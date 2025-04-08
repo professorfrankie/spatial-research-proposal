@@ -2,6 +2,7 @@
 library(dplyr)
 library(stringr)
 library(sf)
+library(tidyverse)
 
 
 landuse <- read_csv("raw_data/lulc_munis.csv") |> 
