@@ -21,3 +21,7 @@ mining <- read_csv("/data/brazil/mining_mapbiomas/mining_munis.csv") |>
 # maybe map together certain substances to make it more feasible
 # compute shares by relating it to municipality area using the shapefile?
 shp_munis <- read_sf("/data/brazil/shp/BR_Municipios_2021.shp")
+
+# mapping of mining_id to substances and mining types
+
+CHECK <- FALSE
