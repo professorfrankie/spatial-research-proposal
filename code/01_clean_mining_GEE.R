@@ -174,3 +174,12 @@ mining_wide <- mining %>%
 # add missing years with area_ha = 0
 mining_full <- full_panel %>%
   left_join(mining, by = c("muni_id", "year"))
+
+
+
+
+
+
+
+### CIAO FRA ####
+
