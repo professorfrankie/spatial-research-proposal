@@ -8,6 +8,28 @@ library(ggplot2)
 library(viridis)
 library(scales)
 
+mining <- read_csv("raw_data/mining_munis.csv", quote = "")
+
+
+mining_clean <- mining |> 
+  transmute(muni_id = CD_MUN, 
+            muni_id = str_replace(muni_id, '"', ""),
+            year = as.numeric(substr(bandName, 17, 20)), 
+            histogram = replace(histogram, histogram == "{}", NA), 
+            histogram = str_replace_all(histogram, "[{}]", ""),
+            histogram = str_replace_all(histogram, '"', "")) |> 
+  filter(!is.na(histogram)) |> 
+  separate_rows(histogram, sep = ",") |> 
+  separate(histogram, into = c("mining_id", "area"), sep = "=") |>  
+  mutate(mining_id = as.numeric(mining_id)) |> 
+  transmute(muni_id, year, mining_id, 
+            area_ha = as.numeric(area) * 30^2 / 10^4) |> 
+  arrange(muni_id, year)
+
+#count amount of observations that have {} in histogram column
+mining %>%
+  filter(histogram == "{}") %>%
+  summarise(count = n())
 
 mining <- read_csv("raw_data/mining_munis.csv") |> 
   transmute(muni_id = CD_MUN, 
