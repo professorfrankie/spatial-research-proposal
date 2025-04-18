@@ -13,4 +13,4 @@ gold_yearly <- gold %>%
   filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
   mutate(Year = year(Date)) %>%
   group_by(Year) %>%
-  summarise(MeanPrice = mean(Price, na.rm = TRUE))
+  summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
