@@ -5,4 +5,4 @@ library(tidyverse)
 
 
 airstrips <- read_csv("raw_data/Illegal-Airstrips-NYT-Intercept-Public.csv")
-airsprip <- airstrips[-c(1,7)]
+airsprip <- airstrips[-c(1,3,7)]
