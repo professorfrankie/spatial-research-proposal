@@ -138,17 +138,19 @@ ggplot() +
 
 ggplot() +
   geom_sf(data = legal_amazon, fill = "white", alpha = 0.3) +
-  geom_sf(data = mining_2022amaz_summarized, aes(fill = total_area_ha), color = "black") +
-  scale_fill_viridis_c(direction = -1, option = "A") +
+  geom_sf(data = mining_2022amaz_summarized, aes(fill = total_area_ha), color = "black", size = 0.5) +
+  scale_fill_viridis_c(direction = -1, option = "A", name = "Total Mining Area (ha)") +
   geom_sf(data = airstrip, aes(colour = miningproximity)) +
-  scale_colour_manual(values = c( "#fecd90", "#e85362")) +
+  scale_colour_manual(values = c("#e85362", "#802582"),
+                      labels = c("TRUE" = "< 20km from mine", "FALSE" = "≥ 20km from mine"),
+                      name = "Airstrip Proximity") +
   labs(
-    title = "**Airstrips in the Brazilian legal Amazon that are <span style = 'color:#CDC9C9;'>more</span><br> and
-    <span style='color:#FFD700;'>less than 20km away</span> from mines**"
+    title = "**Airstrips and Mining Area in the Brazilian Legal Amazon in 2022**"
   ) +
   theme_void() +
   theme(
     plot.title.position = "plot",
-    plot.title = element_markdown()
+    plot.title = element_markdown(size = 16, face = "bold"),
+    plot.subtitle = element_markdown(size = 12)
   ) +
   coord_sf(ylim = c(-19, 6))
