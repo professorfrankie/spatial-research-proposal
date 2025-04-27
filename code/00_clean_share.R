@@ -78,9 +78,15 @@ muni_area <- read_excel("raw_data/AR_BR_RG_UF_RGINT_RGI_MUN_2023.xls") |>
   mutate(area_ha = area_km2*10^4) |> 
   select(muni_id, area_ha)
 
+data("municipalities")
+legal_amazon_munis <- municipalities %>%
+  filter(legal_amazon == 1) %>%
+  pull(code_muni)
+
 share <- garimpo_sum |> 
   left_join(muni_area, by = "muni_id") |> 
   mutate(share = total_area_ha / area_ha) |> 
+  filter(muni_id %in% legal_amazon_munis) |>
   select(muni_id, share)
 
 #summary statistics of share
