@@ -4,7 +4,7 @@ library(stringr)
 library(sf)
 
 
-transition <- readRDS("land_use_change_v9.rds")
+transition <- readRDS("raw_data/land_use_change_v9.rds")
 
 ####### DATSET GET TOGETHER #####
 
@@ -34,8 +34,8 @@ df_gold <- left_join(df, gold_yearly, by = "year")
 
 ## left_join with a shape file
 
-muni_amaz <- read_sf("BR_Municipios_2021/BR_Municipios_2021.shp") |> 
+muni_amaz <- read_sf("raw_data/BR_Municipios_2021.shp") |> 
   rename(muni_id = CD_MUN) |>
   select(muni_id, geometry)
 
-df_shp <- left_join(df, muni_amaz, by = "muni_id")
+df_shp <- left_join(df, shp_munis, by = "muni_id")

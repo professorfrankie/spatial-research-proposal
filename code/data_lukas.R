@@ -286,3 +286,22 @@ shp_munis_missing <- shp_munis %>%
 unique <- as.data.frame(unique(all_years_munis$muni_id))
 
 print(unique, n = 100)
+
+
+### check how many munis are in 1985 and not 2023
+
+art_2023 <- mining_clean |> filter(year == 2023, mining_id %in% c(202:213, 214, 215, 217, 218:222, 224, 225, 227:229)) 
+art_1985 <- mining_clean |> filter(year == 1985, mining_id %in% c(202:213, 214, 215, 217, 218:222, 224, 225, 227:229))
+
+desaparecidos_art <- as.data.frame(setdiff(art_1985$muni_id, art_2023$muni_id)) |> 
+  rename(muni_id = `setdiff(art_2023$muni_id, art_1985$muni_id)`) 
+
+## count how many munis are in 1985 and not 2023
+
+sum(desaparecidos_art$muni_id)
+
+
+garimpo_des <- filter(garimpo, muni_id %in% desaparecidos_art)
+desaparecidos_art <- as.data.frame(desaparecidos_art) |>
+  rename(muni_id = desaparecidos_art) |>
+  left_join(shp_munis, by = "muni_id")

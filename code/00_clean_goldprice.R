@@ -14,3 +14,4 @@ gold_yearly <- gold %>%
   mutate(Year = year(Date)) %>%
   group_by(Year) %>%
   summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
+

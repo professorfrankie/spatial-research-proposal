@@ -176,10 +176,5 @@ mining_full <- full_panel %>%
   left_join(mining, by = c("muni_id", "year"))
 
 
-
-
-
-
-
-### CIAO FRA ####
+## filter
 

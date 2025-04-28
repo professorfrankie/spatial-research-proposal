@@ -96,3 +96,4 @@ landuse_classes <- tibble(
     "LC_Not observed"
   )
 )
+

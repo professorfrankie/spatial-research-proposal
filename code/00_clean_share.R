@@ -65,12 +65,14 @@ garimpo <- mining_clean |>
   filter(year == 1985) |> 
   filter(str_detect(substance, "artisanal")) 
 
+
+
 #garimpo with the sum of area_ha by muni_id
 garimpo_sum <- garimpo |> 
   group_by(muni_id) |> 
   summarise(total_area_ha = sum(area_ha, na.rm = TRUE)) |> 
   ungroup() |> 
-  select(muni_id, total_area_ha,)
+  select(muni_id, total_area_ha)
 
 #load municipalities area
 muni_area <- read_excel("raw_data/AR_BR_RG_UF_RGINT_RGI_MUN_2023.xls") |> 
@@ -89,6 +91,28 @@ share <- garimpo_sum |>
   filter(muni_id %in% legal_amazon_munis) |>
   select(muni_id, share)
 
+
+
 #summary statistics of share
 summary(share$share)
+
+
+garimpo_23 <- mining_clean |> 
+  #filter(year == 2023) |> 
+  filter(str_detect(substance, "artisanal")) 
+
+
+
+#garimpo with the sum of area_ha by muni_id
+garimpo_sum23 <- garimpo_23 |> 
+  group_by(muni_id) |> 
+  summarise(total_area_ha = sum(area_ha, na.rm = TRUE)) |> 
+  ungroup() |> 
+  select(muni_id, total_area_ha,)
+
+share_23 <- garimpo_sum23 |> 
+  left_join(muni_area, by = "muni_id") |> 
+  mutate(share = total_area_ha / area_ha) |> 
+  filter(muni_id %in% legal_amazon_munis) |>
+  select(muni_id, share)
 
