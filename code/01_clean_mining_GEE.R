@@ -23,7 +23,7 @@ mining_clean <- mining |>
   separate(histogram, into = c("mining_id", "area"), sep = "=") |>  
   mutate(mining_id = as.numeric(mining_id)) |> 
   transmute(muni_id, year, mining_id, 
-            area_ha = as.numeric(area) * 30^2 / 10^4) |> 
+            area_ha_mining = as.numeric(area) * 30^2 / 10^4) |> 
   arrange(muni_id, year)
 
 #count amount of observations that have {} in histogram column

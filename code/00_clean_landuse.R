@@ -15,7 +15,7 @@ landuse <- read_csv("raw_data/lulc_munis.csv") |>
   separate(histogram, into = c("landuse_id", "area"), sep = "=") |>  
   mutate(landuse_id = as.numeric(landuse_id)) |> 
   transmute(muni_id, year, landuse_id, 
-            area_ha = as.numeric(area) * 30^2 / 10^4) |> 
+            area_ha_lu = as.numeric(area) * 30^2 / 10^4) |> 
   arrange(muni_id, year)
 
 # need to map it to mining substances names
