@@ -5,13 +5,9 @@ library(tidyverse)
 library(readxl)
 library(ggstream)
 
-setwd("C:\\Users\\Utente\\Desktop\\garimpo")
+mining <- read_csv("raw_data/mining_munis.csv", quote = "")
 
-
-mining1 <- read_csv("C:/Users/Utente/Desktop/garimpo/mining_munis.csv", quote = "")
-
-
-mining_clean <- mining1 |> 
+mining_clean <- mining |> 
   transmute(muni_id = CD_MUN, 
             muni_id = str_replace(muni_id, '"', ""),
             year = as.numeric(substr(bandName, 17, 20)), 
@@ -82,7 +78,7 @@ substances_all <- tibble(
 
 
 
-mining2 <- left_join(mining_clean, substances_all, by = "mining_id")
+mining1 <- left_join(mining_clean, substances_all, by = "mining_id")
 
 artisanal <- c(
   "artisanal_non-metallic", 
@@ -104,9 +100,10 @@ industrial <- c(
   "industrial_metallic_other"
 )
 
+
 ## create variable for artisanal and industrial
 
-mining2_AI <- mining2 |> 
+mining2_AI <- mining1 |> 
   mutate(substance = case_when(
     substance %in% artisanal ~ "artisanal",
     substance %in% industrial ~ "industrial",
@@ -129,24 +126,60 @@ mining_sum <- mining2_AI |>
 
 mining2_AI |> 
   group_by(year, substance) |> 
-  summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |> 
+  summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
   geom_col() +
+  labs(
+    title = "Brazil’s Mining Landscape Through the Years",
+    subtitle = "1985-2023",
+    x = "Year",
+    y = "Area (ha)",
+    fill = ""
+  ) +
   scale_fill_manual(values = pal) +
-  ## change scale y to make it readable withouth e
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+  scale_y_continuous(
+    labels = scales::comma,     
+    expand = expansion(mult = c(0, 0.05)) 
+  ) +
+  theme_minimal()
 
 # Proportional stacked area chart for artisanal mining
 
-mining2 |> 
-  filter(substance %in% artisanal) |>
+mining_art <- mining1 |> 
+  filter(substance %in% artisanal) |>  
   group_by(year, substance) |>
-  summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |>
-  ggplot(aes(x = year, y = area_ha, fill = substance)) +
+  summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |> 
+  mutate(substance = recode(
+    substance,
+    "artisanal_metallic_other" = "Other",
+    "artisanal_metallic_tin" = "Tin",
+    "artisanal_metallic_gold" = "Gold",
+    "artisanal_non-metallic" = "Non-metallic",
+    "artisanal_precious stones" = "Precious stones",
+    "artisanal_non_identified" = "Non-identified"
+  ))
+
+gold <- read_csv("raw_data/monthly.csv")
+
+gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
+
+gold_yearly <- gold %>%
+  filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
+  mutate(Year = year(Date)) %>%
+  group_by(Year) %>%
+  summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
+
+gold_yearly <- gold_yearly |>
+  rename(year = Year)
+
+ggplot(mining_art,aes(x = year, y = area_ha, fill = substance)) +
   geom_area( size = 1) +
   scale_fill_viridis_d(option = "D", direction = 1, name = "Substance") +
   ## change scale y to make it readable withouth e
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_y_continuous(
+    labels = scales::comma,     
+    expand = expansion(mult = c(0, 0.05)) 
+  ) +
   scale_x_continuous(breaks = seq(1985, 2023, 5)) +
   labs(
     title = "Proportional area of artisanal mining in Brazil",
@@ -155,7 +188,53 @@ mining2 |>
     y = "Area (ha)",
     fill = "Substance"
   ) +
-  theme_minimal() 
+  theme_minimal()
+
+# 1. set up the margins: bottom, left, top, right
+#    we leave extra space on the left for the second axis
+par(mar = c(5, 4, 4, 2) + 0.1)  
+
+# 2. plot the primary series (mining area) with its left‐axis
+plot(mining_art$year, mining_art$area_ha,
+     type  = "l",
+     col   = "steelblue",
+     lwd   = 2,
+     xlab  = "Year",
+     ylab  = "Artisanal mining area (ha)",
+     ylim  = range(0, mining_art$area_ha, na.rm = TRUE)
+)
+
+# 3. overlay without redrawing axes or labels
+par(new = TRUE)
+
+# 4. plot the secondary series (gold price), no axes/labels
+plot(gold_yearly$year, gold_yearly$MeanGoldPrice,
+     type   = "l",
+     col    = "firebrick",
+     lwd    = 2,
+     axes   = FALSE,
+     xlab   = "",
+     ylab   = "",
+     ylim   = range(gold_yearly$MeanGoldPrice, na.rm = TRUE)
+)
+
+# 5. draw a second y‐axis on the left, but offset outward by 3 lines
+axis(side = 2,                                        # left side
+     at   = pretty(range(gold_yearly$MeanGoldPrice)), # tick positions
+     labels = pretty(range(gold_yearly$MeanGoldPrice)),
+     line = 3                                         # move it left
+)
+
+# 6. label that new axis
+mtext("Mean gold price (USD)", side = 2, line = 5, col = "firebrick")
+
+# 7. add a legend
+legend("topright", inset = .02,
+       legend = c("Mining area (ha)", "Mean gold price"),
+       col    = c("steelblue",    "firebrick"),
+       lwd    = 2,
+       bg     = "white"
+)
 
 ## Proportional stacked area chart for industrial mining
 
@@ -215,8 +294,69 @@ mining_long_sum <- mining_long_AI  |>
 
 library(sf)
 
-shp_munis <- read_sf("BR_Municipios_2021.shp") |> 
+shp_munis <- st_read("raw_data/BR_Municipios_2021.shp") |> 
   rename(muni_id = CD_MUN)
+
+garimpo_sf <- left_join(mining_clean, shp_munis, by = "muni_id") |> 
+  st_as_sf()
+library(datazoom.amazonia)
+
+muni_area <- read_excel("raw_data/AR_BR_RG_UF_RGINT_RGI_MUN_2023.xls") |> 
+  select(muni_id = CD_MUN, area_km2 = AR_MUN_2023) |> 
+  mutate(area_ha = area_km2*10^4) |> 
+  select(muni_id, area_ha)
+
+data("municipalities")
+legal_amazon_munis <- municipalities %>%
+  filter(legal_amazon == 1) %>%
+  pull(code_muni)
+
+garimpo22_amazzon <- garimpo_sf |> 
+  filter(year == 2022) |> 
+  filter(muni_id %in% legal_amazon_munis)
+
+write_sf(garimpo22_amazzon, "garimpo22_amazzon.shp")
+library(tmap)
+
+# 2. Switch to “plot” mode
+tmap_mode("plot")
+
+# 3. Plot
+tm_shape(shp_munis) + 
+  tm_borders() +  # Add the borders of Brazilian municipalities
+  tm_shape(garimpo22_amazzon) + 
+  tm_polygons(
+    "area_ha",
+    title = "Artisanal Mining Area (ha)",
+    palette = "viridis", 
+    style = "quantile", 
+    n = 5,
+    legend.show = TRUE
+  ) +
+  tm_layout(
+    main.title = "Artisanal Mining Area in Brazil, 2022",
+    legend.outside = TRUE,
+    legend.title.size = 1.2,
+    legend.text.size = 1.0,
+    frame = FALSE
+  ) +
+  tm_credits("Data: Your Source Here", position = c("LEFT", "BOTTOM"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 garimpo <- left_join(mining_clean,shp_munis, by = "muni_id")
 
