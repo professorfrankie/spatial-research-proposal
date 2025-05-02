@@ -123,8 +123,11 @@ df_amazon <- df |>
   filter(muni_id %in% legal_amazon_munis) |> 
   left_join(muni_area, by = "muni_id")
 
+write.csv(df_amazon, 
+          "processed_data/df_amazon_raw.csv")
+
 df_amazon_final <- df_amazon |> 
-  filter(year >= 2000)
+  filter(year >= 1999)
 
 write.csv(df_amazon_final, 
           "processed_data/df_amazon.csv")
