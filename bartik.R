@@ -157,8 +157,10 @@ c_hat <- fitted.values(first_stage_1)
 # Add c_hat to your data
 df_model$c_hat <- c_hat
 
+rhs1 <- paste(all.vars(fml1)[-1], collapse = " + ")
+
 # Construct right-hand side: "c_hat + control1 + control2 + ..."
-rhs_with_controls <- paste("c_hat", rhs_controls, sep = " + ")
+rhs_with_controls <- paste("c_hat", rhs1, sep = " + ")
 
 # Final formula string
 formula_str <- paste("forest_to_mining_gross ~", rhs_with_controls, "| year")
