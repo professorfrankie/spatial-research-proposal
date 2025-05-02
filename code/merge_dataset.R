@@ -70,7 +70,12 @@ mining_spec <- mining_clean |>
   ))
 
 garimpo <- mining_spec |> 
-  filter(str_detect(substance, "artisanal"))
+  filter(str_detect(substance, "artisanal")) |> 
+  group_by(muni_id, year) |>
+  summarise(artisanal_mining_area_ha = sum(area_ha_mining, na.rm = TRUE), 
+            .groups = "drop") |> 
+  mutate(change_in_area = artisanal_mining_area_ha - lag(artisanal_mining_area_ha))
+  
 
 
 ### LANDUSE CHANGE DATA
