@@ -58,8 +58,9 @@ df_bartik_final <- df_bartik |>
 
 library(fixest)
 
-controls <- readRDS("raw_data/brazil_munis_indicators.RDS") 
-  #select(-c(pa_own_km2, cattle, cattle_dens, p_beef))
+controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
+  select(-muni)
+
 
 # Join temporarily
 df_model <- df_bartik_final %>%
@@ -94,7 +95,7 @@ summary(modelt1)
 # lag t-2
 # Build formula
 fml2 <- reformulate(c("bartik2", control_var), response = "forest_to_mining_gross")
-# Convert formula to character, then append fixed effects
+# Convert formula to character, then append fixed effects                      
 rhs2 <- paste(all.vars(fml2)[-1], collapse = " + ")
 full_formula2 <- as.formula(paste("forest_to_mining_gross ~", rhs2, "| year"))
 # Estimate fixed effects model
@@ -172,7 +173,7 @@ fml1a <- reformulate(c("bartik", control_var), response = "artisanal_mining_area
 
 # Convert formula to character, then append fixed effects
 rhs1a <- paste(all.vars(fml1a)[-1], collapse = " + ")
-full_formula1a <- as.formula(paste("artisanal_mining_area_ha ~", rhs1a, "| year"))
+full_formula1a <- as.formula(paste("artisanal_mining_area_ha ~", rhs1a, "| muni_id + year"))
 
 # Estimate fixed effects model
 first_stage1a <- feols(full_formula1a, data = df_model)
@@ -190,7 +191,7 @@ summary(first_stage1b)
 fml2a <- reformulate(c("bartik2", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs2a <- paste(all.vars(fml2a)[-1], collapse = " + ")
-full_formula2a <- as.formula(paste("artisanal_mining_area_ha ~", rhs2a, "| year"))
+full_formula2a <- as.formula(paste("artisanal_mining_area_ha ~", rhs2a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage2a <- feols(full_formula2a, data = df_model)
 summary(first_stage2a)
@@ -203,7 +204,7 @@ summary(first_stage2b)
 fml3a <- reformulate(c("bartik3", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs3a <- paste(all.vars(fml3a)[-1], collapse = " + ")
-full_formula3a <- as.formula(paste("artisanal_mining_area_ha ~", rhs3a, "| year"))
+full_formula3a <- as.formula(paste("artisanal_mining_area_ha ~", rhs3a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage3a <- feols(full_formula3a, data = df_model)
 summary(first_stage3a)
@@ -219,7 +220,7 @@ summary(first_stage3b)
 fml4a <- reformulate(c("bartik4", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs4a <- paste(all.vars(fml4a)[-1], collapse = " + ")
-full_formula4a <- as.formula(paste("artisanal_mining_area_ha ~", rhs4a, "| year"))
+full_formula4a <- as.formula(paste("artisanal_mining_area_ha ~", rhs4a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage4a <- feols(full_formula4a, data = df_model)
 summary(first_stage4a)
@@ -288,7 +289,6 @@ modelsummary(
 
 # Build second-stage (2SLS) formula
 
-################################################################################
 rhs_controls <- paste(control_var, collapse = " + ")
 
 # second stage for artisanal_mining_area_ha
@@ -298,7 +298,7 @@ df_model$m1_hat <- m1_hat
 fml1A <- reformulate(c("m1_hat", rhs_controls), response = "forest_to_mining_gross")
 # Convert formula to character, then append fixed effects
 rhs1A <- paste(all.vars(fml1A)[-1], collapse = " + ")
-full_formula1A <- as.formula(paste("forest_to_mining_gross ~", rhs1A, "| year"))
+full_formula1A <- as.formula(paste("forest_to_mining_gross ~", rhs1A, "|muni_id + year"))
 # Estimate fixed effects model
 second_stage1A <- feols(full_formula1A, data = df_model)
 
@@ -435,29 +435,4 @@ second_stage <- feols(iv_formula, data = df_model)
 summary(second_stage)
 
 # View results
-summary(second_stage)
-
-################################################################################
-
-
-# First get fitted values from first stage
-c_hat <- fitted.values(first_stage1)
-
-# Add c_hat to your data
-df_model$c_hat <- c_hat
-
-rhs1 <- paste(all.vars(fml1)[-1], collapse = " + ")
-
-# Construct right-hand side: "c_hat + control1 + control2 + ..."
-rhs_with_controls <- paste("c_hat", rhs1, sep = " + ")
-
-# Final formula string
-formula_str <- paste("forest_to_mining_gross ~", rhs_with_controls, "| year")
-
-# Convert to formula
-iv_formula_manual <- as.formula(formula_str)
-
-# Run second-stage manually with predicted values
-second_stage <- feols(iv_formula_manual, data = df_model)
-
 summary(second_stage)

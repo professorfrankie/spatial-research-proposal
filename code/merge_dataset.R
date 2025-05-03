@@ -90,18 +90,20 @@ transition <- transition |>
   
 ## GOLD DATA
 
-gold <- read_csv("raw_data/monthly.csv")
+gold <- read_csv("raw_data/annual.csv")
 
 gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
 
-gold_yearly <- gold %>%
-  filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
-  mutate(Year = year(Date)) %>%
-  group_by(Year) %>%
-  summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
+#gold_yearly <- gold %>%
+ # filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
+  #mutate(Year = year(Date)) %>%
+  #group_by(Year) %>%
+  #summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
 
-gold_yearly <- gold_yearly |>
-  rename(year = Year)
+gold_yearly <- gold |>
+  rename(year = Date) |>
+  rename(GoldPrice = Price) |>
+  filter(between(year, 1985, 2023))
   
 ## MERGE DATASET
 
