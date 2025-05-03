@@ -4,25 +4,33 @@ library(stringr)
 library(sf)
 library(readxl)
 library(readr)
+library(fixest)
+library(modelsummary)
 
 
 df <- read_csv("processed_data/df_amazon_raw.csv") |> 
   select(-c(...1))
 
-df_share <- df |> 
-  filter(year == 2001) |>
+
+df_share <- df %>%
+  group_by(year) %>%
+  mutate(total_yearly_mining_area = sum(artisanal_mining_area_ha, na.rm = TRUE)) %>%
+  ungroup()|> 
   mutate(
-    share_zi0 = artisanal_mining_area_ha / area_ha
+    share_zi0 = artisanal_mining_area_ha / total_yearly_mining_area
   ) |> 
+  filter(year == 2001) |>
   select(muni_id, year, share_zi0)
+
+sum(df_share$share_zi0)
 
 
 df_shift <- df |> 
   mutate(
-    shift_1 = lag(MeanGoldPrice, 1),
-    shift_2 = lag(MeanGoldPrice, 2),
-    shift_3 = lag(MeanGoldPrice, 3),
-    shift_4 = lag(MeanGoldPrice, 4)
+    shift_1 = lag(GoldPrice, 1),
+    shift_2 = lag(GoldPrice, 2),
+    shift_3 = lag(GoldPrice, 3),
+    shift_4 = lag(GoldPrice, 4)
   ) |> filter(year > 2001) |> 
   select(muni_id, year, shift_1, shift_2, shift_3, shift_4)
 
@@ -55,8 +63,6 @@ df_bartik_final <- df_bartik |>
   filter(year <= 2022)
 
 ## REGRESSION: Reduced form
-
-library(fixest)
 
 controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
   select(-muni)
@@ -122,24 +128,9 @@ full_formula4 <- as.formula(paste("forest_to_mining_gross ~", rhs4, "| year"))
 modelt4 <- feols(full_formula4, data = df_model)
 summary(modelt4)
 
-library(modelsummary)
-
-modelsummary(
-  list("t-1" = modelt1, "t-2" = modelt2, "t-3" = modelt3, "t-4" = modelt4),
-  output = "latex",
-  title = "Reduced Form Estimates",
-  coef_map = c("bartik" = "Bartik t-1", 
-               "bartik2" = "Bartik t-2", 
-               "bartik3" = "Bartik t-3", 
-               "bartik4" = "Bartik t-4"),
-  statistic = NULL  # removes standard stats like F and SER if you want
-)
-
-library(fixest)
-library(modelsummary)
 
 # Example with feols models
-models <- list(
+modelsRF <- list(
   "t-1" = modelt1,
   "t-2" = modelt2,
   "t-3" = modelt3,
@@ -147,14 +138,14 @@ models <- list(
 )
 
 modelsummary(
-  models,
+  modelsRF,
   output = "latex",
   title = "Reduced Form Estimates",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -247,10 +238,10 @@ modelsummary(
   output = "latex",
   title = "First Stage Estimates",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -273,10 +264,10 @@ modelsummary(
   output = "latex",
   title = "First Stage Estimates - Change in Area",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -387,10 +378,10 @@ modelsummary(
   output = "latex",
   title = "Second Stage Estimates",
   coef_map = c(
-    "m1_hat" = "Bartik t-1",
-    "m2_hat" = "Bartik t-2",
-    "m3_hat" = "Bartik t-3",
-    "m4_hat" = "Bartik t-4"
+    "m1_hat" = "mining",
+    "m2_hat" = "mining",
+    "m3_hat" = "mining",
+    "m4_hat" = "mining"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -412,10 +403,10 @@ modelsummary(
   output = "latex",
   title = "Second Stage Estimates - Change in Area",
   coef_map = c(
-    "dm1_hat" = "Bartik t-1",
-    "dm2_hat" = "Bartik t-2",
-    "dm3_hat" = "Bartik t-3",
-    "dm4_hat" = "Bartik t-4"
+    "dm1_hat" = " minig",
+    "dm2_hat" = " minig",
+    "dm3_hat" = " minig",
+    "dm4_hat" = " minig"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
