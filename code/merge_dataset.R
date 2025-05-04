@@ -84,15 +84,16 @@ transition <- readRDS("raw_data/land_use_change_v9.rds")
 
 transition <- transition |> 
   mutate(muni_id = as.character(muni_id)) |> 
-  select(muni_id, year, forest_loss_all_net, mining, mining_gain_gross, 
-         mining_net, f_veg_to_mining_gross, forest_to_mining_gross, 
-         forest_to_mining_net)
+  select(muni_id, year, forest_loss_all_gross, forest_loss_all_net, mining, mining_gain_gross, 
+         mining_net, forest_to_mining_gross,
+         forest_to_mining_net, forest_to_pasture_gross, forest_to_pasture_net, 
+         forest_to_soy_gross, forest_to_soy_net)
   
 ## GOLD DATA
 
 gold <- read_csv("raw_data/annual.csv")
 
-gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
+# gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
 
 #gold_yearly <- gold %>%
  # filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
