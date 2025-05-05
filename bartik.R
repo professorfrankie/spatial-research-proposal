@@ -4,25 +4,33 @@ library(stringr)
 library(sf)
 library(readxl)
 library(readr)
+library(fixest)
+library(modelsummary)
 
 
 df <- read_csv("processed_data/df_amazon_raw.csv") |> 
   select(-c(...1))
 
-df_share <- df |> 
-  filter(year == 2001) |>
+
+df_share <- df %>%
+  group_by(year) %>%
+  mutate(total_yearly_mining_area = sum(artisanal_mining_area_ha, na.rm = TRUE)) %>%
+  ungroup()|> 
   mutate(
-    share_zi0 = artisanal_mining_area_ha / area_ha
+    share_zi0 = artisanal_mining_area_ha / total_yearly_mining_area
   ) |> 
+  filter(year == 2001) |>
   select(muni_id, year, share_zi0)
+
+sum(df_share$share_zi0)
 
 
 df_shift <- df |> 
   mutate(
-    shift_1 = lag(MeanGoldPrice, 1),
-    shift_2 = lag(MeanGoldPrice, 2),
-    shift_3 = lag(MeanGoldPrice, 3),
-    shift_4 = lag(MeanGoldPrice, 4)
+    shift_1 = lag(GoldPrice, 1),
+    shift_2 = lag(GoldPrice, 2),
+    shift_3 = lag(GoldPrice, 3),
+    shift_4 = lag(GoldPrice, 4)
   ) |> filter(year > 2001) |> 
   select(muni_id, year, shift_1, shift_2, shift_3, shift_4)
 
@@ -56,10 +64,14 @@ df_bartik_final <- df_bartik |>
 
 ## REGRESSION: Reduced form
 
-library(fixest)
+controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
+  select(-muni)
 
-controls <- readRDS("raw_data/brazil_munis_indicators.RDS") 
-  #select(-c(pa_own_km2, cattle, cattle_dens, p_beef))
+
+controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
+  select(-muni)
+
+
 
 # Join temporarily
 df_model <- df_bartik_final %>%
@@ -94,7 +106,7 @@ summary(modelt1)
 # lag t-2
 # Build formula
 fml2 <- reformulate(c("bartik2", control_var), response = "forest_to_mining_gross")
-# Convert formula to character, then append fixed effects
+# Convert formula to character, then append fixed effects                      
 rhs2 <- paste(all.vars(fml2)[-1], collapse = " + ")
 full_formula2 <- as.formula(paste("forest_to_mining_gross ~", rhs2, "| year"))
 # Estimate fixed effects model
@@ -121,24 +133,9 @@ full_formula4 <- as.formula(paste("forest_to_mining_gross ~", rhs4, "| year"))
 modelt4 <- feols(full_formula4, data = df_model)
 summary(modelt4)
 
-library(modelsummary)
-
-modelsummary(
-  list("t-1" = modelt1, "t-2" = modelt2, "t-3" = modelt3, "t-4" = modelt4),
-  output = "latex",
-  title = "Reduced Form Estimates",
-  coef_map = c("bartik" = "Bartik t-1", 
-               "bartik2" = "Bartik t-2", 
-               "bartik3" = "Bartik t-3", 
-               "bartik4" = "Bartik t-4"),
-  statistic = NULL  # removes standard stats like F and SER if you want
-)
-
-library(fixest)
-library(modelsummary)
 
 # Example with feols models
-models <- list(
+modelsRF <- list(
   "t-1" = modelt1,
   "t-2" = modelt2,
   "t-3" = modelt3,
@@ -146,14 +143,14 @@ models <- list(
 )
 
 modelsummary(
-  models,
+  modelsRF,
   output = "latex",
   title = "Reduced Form Estimates",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -172,7 +169,7 @@ fml1a <- reformulate(c("bartik", control_var), response = "artisanal_mining_area
 
 # Convert formula to character, then append fixed effects
 rhs1a <- paste(all.vars(fml1a)[-1], collapse = " + ")
-full_formula1a <- as.formula(paste("artisanal_mining_area_ha ~", rhs1a, "| year"))
+full_formula1a <- as.formula(paste("artisanal_mining_area_ha ~", rhs1a, "| muni_id + year"))
 
 # Estimate fixed effects model
 first_stage1a <- feols(full_formula1a, data = df_model)
@@ -190,7 +187,7 @@ summary(first_stage1b)
 fml2a <- reformulate(c("bartik2", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs2a <- paste(all.vars(fml2a)[-1], collapse = " + ")
-full_formula2a <- as.formula(paste("artisanal_mining_area_ha ~", rhs2a, "| year"))
+full_formula2a <- as.formula(paste("artisanal_mining_area_ha ~", rhs2a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage2a <- feols(full_formula2a, data = df_model)
 summary(first_stage2a)
@@ -203,7 +200,7 @@ summary(first_stage2b)
 fml3a <- reformulate(c("bartik3", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs3a <- paste(all.vars(fml3a)[-1], collapse = " + ")
-full_formula3a <- as.formula(paste("artisanal_mining_area_ha ~", rhs3a, "| year"))
+full_formula3a <- as.formula(paste("artisanal_mining_area_ha ~", rhs3a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage3a <- feols(full_formula3a, data = df_model)
 summary(first_stage3a)
@@ -219,7 +216,7 @@ summary(first_stage3b)
 fml4a <- reformulate(c("bartik4", control_var), response = "artisanal_mining_area_ha")
 # Convert formula to character, then append fixed effects
 rhs4a <- paste(all.vars(fml4a)[-1], collapse = " + ")
-full_formula4a <- as.formula(paste("artisanal_mining_area_ha ~", rhs4a, "| year"))
+full_formula4a <- as.formula(paste("artisanal_mining_area_ha ~", rhs4a, "| muni_id + year"))
 # Estimate fixed effects model
 first_stage4a <- feols(full_formula4a, data = df_model)
 summary(first_stage4a)
@@ -246,10 +243,10 @@ modelsummary(
   output = "latex",
   title = "First Stage Estimates",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -272,10 +269,10 @@ modelsummary(
   output = "latex",
   title = "First Stage Estimates - Change in Area",
   coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",
-    "bartik4" = "Bartik t-4"
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -288,7 +285,6 @@ modelsummary(
 
 # Build second-stage (2SLS) formula
 
-################################################################################
 rhs_controls <- paste(control_var, collapse = " + ")
 
 # second stage for artisanal_mining_area_ha
@@ -298,7 +294,7 @@ df_model$m1_hat <- m1_hat
 fml1A <- reformulate(c("m1_hat", rhs_controls), response = "forest_to_mining_gross")
 # Convert formula to character, then append fixed effects
 rhs1A <- paste(all.vars(fml1A)[-1], collapse = " + ")
-full_formula1A <- as.formula(paste("forest_to_mining_gross ~", rhs1A, "| year"))
+full_formula1A <- as.formula(paste("forest_to_mining_gross ~", rhs1A, "|muni_id + year"))
 # Estimate fixed effects model
 second_stage1A <- feols(full_formula1A, data = df_model)
 
@@ -387,10 +383,10 @@ modelsummary(
   output = "latex",
   title = "Second Stage Estimates",
   coef_map = c(
-    "m1_hat" = "Bartik t-1",
-    "m2_hat" = "Bartik t-2",
-    "m3_hat" = "Bartik t-3",
-    "m4_hat" = "Bartik t-4"
+    "m1_hat" = "mining",
+    "m2_hat" = "mining",
+    "m3_hat" = "mining",
+    "m4_hat" = "mining"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -412,10 +408,10 @@ modelsummary(
   output = "latex",
   title = "Second Stage Estimates - Change in Area",
   coef_map = c(
-    "dm1_hat" = "Bartik t-1",
-    "dm2_hat" = "Bartik t-2",
-    "dm3_hat" = "Bartik t-3",
-    "dm4_hat" = "Bartik t-4"
+    "dm1_hat" = " minig",
+    "dm2_hat" = " minig",
+    "dm3_hat" = " minig",
+    "dm4_hat" = " minig"
   ),
   statistic = c("({std.error})", "p.value"),  # similar to stargazer's default
   stars = TRUE,
@@ -437,27 +433,3 @@ summary(second_stage)
 # View results
 summary(second_stage)
 
-################################################################################
-
-
-# First get fitted values from first stage
-c_hat <- fitted.values(first_stage1)
-
-# Add c_hat to your data
-df_model$c_hat <- c_hat
-
-rhs1 <- paste(all.vars(fml1)[-1], collapse = " + ")
-
-# Construct right-hand side: "c_hat + control1 + control2 + ..."
-rhs_with_controls <- paste("c_hat", rhs1, sep = " + ")
-
-# Final formula string
-formula_str <- paste("forest_to_mining_gross ~", rhs_with_controls, "| year")
-
-# Convert to formula
-iv_formula_manual <- as.formula(formula_str)
-
-# Run second-stage manually with predicted values
-second_stage <- feols(iv_formula_manual, data = df_model)
-
-summary(second_stage)

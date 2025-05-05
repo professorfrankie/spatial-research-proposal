@@ -159,6 +159,8 @@ mining_art <- mining1 |>
     "artisanal_non_identified" = "Non-identified"
   ))
 
+ggsave("figures/mining_artisanal.png", width = 8, height = 5)
+
 gold <- read_csv("raw_data/monthly.csv")
 
 gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
@@ -311,11 +313,11 @@ legal_amazon_munis <- municipalities %>%
   filter(legal_amazon == 1) %>%
   pull(code_muni)
 
-garimpo22_amazzon <- garimpo_sf |> 
-  filter(year == 2022) |> 
-  filter(muni_id %in% legal_amazon_munis)
+garimpo_amazzon <- mining_clean |> 
+  filter(muni_id %in% legal_amazon_munis) |> 
+  left_join(shp_munis, by = "muni_id")
 
-write_sf(garimpo22_amazzon, "garimpo22_amazzon.shp")
+write_sf(garimpo_amazzon, "garimpo22_amazzon.shp")
 library(tmap)
 
 # 2. Switch to “plot” mode
@@ -341,6 +343,109 @@ tm_shape(shp_munis) +
     frame = FALSE
   ) +
   tm_credits("Data: Your Source Here", position = c("LEFT", "BOTTOM"))
+
+
+library(tmap)
+library(sf)
+library(dplyr)
+library(datazoom.amazonia)
+
+
+shp_munis <- st_read("raw_data/BR_Municipios_2021.shp") |> 
+  rename(muni_id = CD_MUN)
+
+garimpo_sf <- left_join(mining_clean, shp_munis, by = "muni_id") |> 
+  st_as_sf()
+
+data("municipalities")
+
+shp_munis <- shp_munis %>%
+  mutate(muni_id = as.character(muni_id))
+
+municipalities <- municipalities %>%
+  mutate(code_muni = as.character(code_muni))
+
+legal_amazon_munis <- shp_munis %>%
+  filter(muni_id %in% municipalities$code_muni[municipalities$legal_amazon == 1]) %>%
+  left_join(municipalities, by = c("muni_id" = "code_muni"))
+
+garimpo_amazzon <- mining_clean |>
+  filter(muni_id %in% legal_amazon_munis$code_muni)
+
+write_sf(garimpo_amazzon, "garimpo_amazzon.shp")
+
+map_amazonia <- tm_shape(legal_amazon_munis ) +
+  tm_borders(col = "gray40") +
+  tm_fill(col = "forestgreen") +
+  tm_layout(frame = FALSE)
+
+
+map_brasile <- tm_shape(shp_munis) +
+  tm_borders(col = "gray70") +
+  tm_shape(legal_amazon_munis) +
+  tm_borders(col = "red", lwd = 2)
+
+
+# 1. Load data
+mt_munis <- read_municipality(code_state = "MT", year = 2020)
+brazil <- read_country(year = 2020)
+
+# 2. Merge biome info
+# Let's say your biome data is in a dataframe `biomes` with columns: code_muni, biome
+# Ensure both have same type
+biomes$code_muni <- as.character(biomes$code_muni)
+mt_munis$code_muni <- as.character(mt_munis$code_muni)
+
+mt_munis <- mt_munis %>%
+  left_join(biomes, by = "code_muni")
+
+# 3. Create main map
+main_map <- tm_shape(mt_munis) +
+  tm_polygons("biome",
+              palette = c("forestgreen", "goldenrod", "navy"),
+              title = "Biome") +
+  tm_borders(col = "gray60", lwd = 0.5) +
+  tm_layout(title = "Biomes of Mato Grosso", legend.outside = TRUE) +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_compass(position = c("right", "top"), type = "8star")
+
+# 4. Create inset map
+inset <- tm_shape(brazil) +
+  tm_borders(col = "gray60") +
+  tm_shape(mt_munis) +
+  tm_borders(col = "black", lwd = 2)
+
+# 5. Combine maps
+final_map <- main_map +
+  tm_inset(inset,
+           position = c(0.02, 0.02),
+           width = 0.25, height = 0.25)
+
+# 6. Plot it
+tmap_mode("plot")
+final_map
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

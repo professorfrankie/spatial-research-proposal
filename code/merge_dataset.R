@@ -75,7 +75,20 @@ garimpo <- mining_spec |>
   summarise(artisanal_mining_area_ha = sum(area_ha_mining, na.rm = TRUE), 
             .groups = "drop") |> 
   mutate(change_in_area = artisanal_mining_area_ha - lag(artisanal_mining_area_ha))
+
+data("municipalities")
+legal_amazon_munis <- municipalities %>%
+  filter(legal_amazon == 1) %>%
+  pull(code_muni)
+
+
+garimpo_amazzon <- garimpo |> 
+  filter(muni_id %in% legal_amazon_munis) |> 
+  left_join(shp_munis, by = "muni_id")
   
+write_sf(garimpo_amazzon, 
+          "processed_data/garimpo_amazon.shp", 
+          delete_dsn = TRUE)
 
 
 ### LANDUSE CHANGE DATA
@@ -84,24 +97,27 @@ transition <- readRDS("raw_data/land_use_change_v9.rds")
 
 transition <- transition |> 
   mutate(muni_id = as.character(muni_id)) |> 
-  select(muni_id, year, forest_loss_all_net, mining, mining_gain_gross, 
-         mining_net, f_veg_to_mining_gross, forest_to_mining_gross, 
-         forest_to_mining_net)
+  select(muni_id, year, forest_loss_all_gross, forest_loss_all_net, mining, mining_gain_gross, 
+         mining_net, forest_to_mining_gross,
+         forest_to_mining_net, forest_to_pasture_gross, forest_to_pasture_net, 
+         forest_to_soy_gross, forest_to_soy_net)
   
 ## GOLD DATA
 
-gold <- read_csv("raw_data/monthly.csv")
+gold <- read_csv("raw_data/annual.csv")
 
-gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
+# gold$Date <- as.Date(paste(gold$Date, "01", sep="-"), format="%Y-%m-%d")
 
-gold_yearly <- gold %>%
-  filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
-  mutate(Year = year(Date)) %>%
-  group_by(Year) %>%
-  summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
+#gold_yearly <- gold %>%
+ # filter(between(Date, as.Date('1985-01-01'), as.Date('2023-12-01'))) %>%
+  #mutate(Year = year(Date)) %>%
+  #group_by(Year) %>%
+  #summarise(MeanGoldPrice = mean(Price, na.rm = TRUE))
 
-gold_yearly <- gold_yearly |>
-  rename(year = Year)
+gold_yearly <- gold |>
+  rename(year = Date) |>
+  rename(GoldPrice = Price) |>
+  filter(between(year, 1985, 2023))
   
 ## MERGE DATASET
 
