@@ -123,8 +123,12 @@ control_var <- setdiff(names(df_model), c("muni_id", "year", "artisanal_mining_a
                                           "mining", "mining_gain_gross", "mining_net",
                                           "f_vegetation_gross", "forest_to_mining_gross", "forest_to_mining_net",
                                           "GoldPrice", "area_ha", "share_zi0", "shift_1", "shift_2", "shift_3", 
+<<<<<<< HEAD
                                           "shift_4", "bartik", "bartik2", "bartik3", "bartik4",
                                           "forest_loss_all_gross", "forest_loss_all_net"))
+=======
+                                          "shift_4", "bartik", "bartik2", "bartik3", "bartik4"))
+>>>>>>> a3d34b42077d6e0df58e5eec19bb28eaa0762c4e
 
 ##### REDUCED FORM #####
 

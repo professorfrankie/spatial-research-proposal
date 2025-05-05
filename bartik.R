@@ -68,9 +68,9 @@ controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |>
   select(-muni)
 
 
+
 controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
   select(-muni)
-
 
 
 # Join temporarily
