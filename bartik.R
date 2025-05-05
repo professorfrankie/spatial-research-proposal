@@ -433,3 +433,7 @@ summary(second_stage)
 # View results
 summary(second_stage)
 
+plot(log(df_model$artisanal_mining_area_ha), log(df_model$forest_to_mining_gross), 
+     xlab = "Change in Area", ylab = "Forest to Mining Gross", 
+     main = "Scatterplot of Change in Area vs Forest to Mining Gross")
+
