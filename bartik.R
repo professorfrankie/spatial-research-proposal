@@ -420,20 +420,13 @@ modelsummary(
   escape = FALSE  # to allow LaTeX symbols in labels
 )
 
-second_stage1a <- as.formula(paste(forest_to_mining_gross ~ m1_hat, rhs_controls, "| year"))
-
-iv_formula <- as.formula(
-  paste0("forest_loss_all_net ~ ", rhs_controls, 
-         " + forest_to_mining_gross | year | (forest_to_mining_gross ~ bartik3)")
-)
-
-second_stage <- feols(iv_formula, data = df_model)
-summary(second_stage)
-
-# View results
-summary(second_stage)
-
 plot(log(df_model$artisanal_mining_area_ha), log(df_model$forest_to_mining_gross), 
      xlab = "Change in Area", ylab = "Forest to Mining Gross", 
      main = "Scatterplot of Change in Area vs Forest to Mining Gross")
+
+df_model_garimpo_zero <- df_model |> 
+  filter(muni_id %in% c(1100940, 1300060, 1301100, 1303809, 1304237,
+                        1400100, 1400175, 1504422, 1507102, 1507409, 
+                        1600238, 1600303, 1700400, 2100477, 2103604, 
+                        2110039, 2111201))
 
