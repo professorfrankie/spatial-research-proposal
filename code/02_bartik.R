@@ -69,7 +69,6 @@ controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |>
     gdp_pc_change = gdp_pc - lag(gdp_pc, 1),
     population_change = population - lag(population, 1),
     pop_dens_change = pop_dens - lag(pop_dens, 1),
-    pa_ind_ha_change = pa_ind_ha - lag(pa_ind_ha, 1),
     pa_tot_ha_change = pa_tot_ha - lag(pa_tot_ha, 1),
     cattle_change = cattle - lag(cattle, 1),
     soy_ton_change = soy_ton - lag(soy_ton, 1),
