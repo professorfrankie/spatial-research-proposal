@@ -429,4 +429,6 @@ df_model_garimpo_zero <- df_model |>
                         1400100, 1400175, 1504422, 1507102, 1507409, 
                         1600238, 1600303, 1700400, 2100477, 2103604, 
                         2110039, 2111201))
+df_model <- df_model |> 
+  filter(!(muni_id %in% df_model_garimpo_zero$muni_id))
 
