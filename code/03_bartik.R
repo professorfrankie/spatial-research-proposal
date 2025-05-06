@@ -215,3 +215,8 @@ modelsummary(
   escape = FALSE
 )
 
+summary(second_stage1B, stage = 1)
+summary(second_stage2B, stage = 1)
+summary(second_stage3B, stage = 1)
+summary(second_stage4B, stage = 1)
+
