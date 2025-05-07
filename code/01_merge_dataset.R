@@ -4,6 +4,7 @@ library(stringr)
 library(sf)
 library(readxl)
 library(readr)
+library(datazoom.amazonia)
 
 transition <- readRDS("raw_data/land_use_change_v9.rds") |> 
   select(muni_id, year, forest_loss_all_gross, forest) |>
@@ -98,3 +99,17 @@ df <- transition |>
     garimpo_ha = ifelse(is.na(garimpo_ha), 0, garimpo_ha)
   ) |>
   filter(between(year, 2002, 2022))
+
+data("municipalities")
+legal_amazon_munis <- municipalities %>%
+  filter(legal_amazon == 1) %>%
+  pull(code_muni)
+
+df_amazon <- df |> 
+  filter(muni_id %in% legal_amazon_munis)
+
+na_count <- sum(is.na(df_amazon))
+colSums(is.na(df_amazon))
+
+write.csv(df_amazon, 
+          "processed_data/df_amazon_new.csv")
