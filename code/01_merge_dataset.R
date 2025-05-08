@@ -8,11 +8,21 @@ library(datazoom.amazonia)
 
 transition <- readRDS("raw_data/land_use_change_v9.rds") |> 
   select(muni_id, year, forest_loss_all_gross, forest) |>
+  mutate(forest_change = forest - lag(forest)) |>
   filter(between(year, 2002, 2022))
 
 controls <- readRDS("raw_data/brazil_munis_indicators.RDS") |> 
   select(muni_id, year, gdp_pc, population, pop_dens,
-         pa_tot_ha, n_fined, brl_fined, spei_dry)
+         pa_tot_ha, n_fined, brl_fined, spei_dry) |>
+  mutate(
+    gdp_pc_change = gdp_pc - lag(gdp_pc),
+    population_change = population - lag(population),
+    pop_dens_change = pop_dens - lag(pop_dens),
+    pa_tot_ha_change = pa_tot_ha - lag(pa_tot_ha),
+    n_fined_change = n_fined - lag(n_fined),
+    brl_fined_change = brl_fined - lag(brl_fined)
+  ) |>
+  filter(between(year, 2002, 2022))
 
 mining <- read_csv("raw_data/mining_munis.csv", quote = "") |> 
   transmute(muni_id = CD_MUN, 
@@ -79,14 +89,14 @@ garimpo <- mining_spec |>
   summarise(garimpo_ha = sum(area_ha_mining, na.rm = TRUE), 
             .groups = "drop") |> 
   mutate(garimpo_ha_change = garimpo_ha - lag(garimpo_ha)) |>
-  filter(between(year, 2002, 2022)) |>
+  filter(between(year, 2001, 2022)) |>
   mutate(muni_id = as.numeric(muni_id))
 
 gold <- read_csv("raw_data/annual.csv")
 gold_yearly <- gold |>
   rename(year = Date) |>
   rename(GoldPrice = Price) |>
-  filter(between(year, 2002, 2022))
+  filter(between(year, 2001, 2022))
 
 #merge datasets
 
@@ -98,7 +108,7 @@ df <- transition |>
     garimpo_ha_change = ifelse(is.na(garimpo_ha_change), 0, garimpo_ha_change),
     garimpo_ha = ifelse(is.na(garimpo_ha), 0, garimpo_ha)
   ) |>
-  filter(between(year, 2002, 2022))
+  filter(between(year, 2001, 2022))
 
 data("municipalities")
 legal_amazon_munis <- municipalities %>%
