@@ -229,10 +229,10 @@ modelsummary(
   escape = FALSE
 )
 
-summary(second_stage1, stage = 1)
-summary(second_stage2, stage = 1)
-summary(second_stage3, stage = 1)
-summary(second_stage4, stage = 1)
+summary(second_stage5, stage = 1)
+summary(second_stage6, stage = 1)
+summary(second_stage7, stage = 1)
+summary(second_stage8, stage = 1)
 
 # second stage with multiple bartiks
 
@@ -285,7 +285,7 @@ modelsummary(
   escape = FALSE
 )
 
-summary(second_stage1B, stage = 1)
-summary(second_stage2B, stage = 1)
-summary(second_stage3B, stage = 1)
-summary(second_stage4B, stage = 1)
+summary(second_stage5B, stage = 1)
+summary(second_stage6B, stage = 1)
+summary(second_stage7B, stage = 1)
+summary(second_stage8B, stage = 1)

@@ -170,37 +170,93 @@ modelsummary(
 ###### SECOND STAGE #########
 
 # second stage for change_in_area
-second_stage1B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+second_stage1 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                         population_change + pop_dens_change + pa_tot_ha_change + 
                         n_fined_change + brl_fined_change | year | change_in_area ~ bartik,
+                        data = df_model)
+summary(second_stage1)
+
+second_stage2 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                        population_change + pop_dens_change + pa_tot_ha_change + 
+                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik2,
+                        data = df_model)
+summary(second_stage2)
+
+second_stage3 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                        population_change + pop_dens_change + pa_tot_ha_change + 
+                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik3,
+                        data = df_model)
+summary(second_stage3)
+
+second_stage4 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                        population_change + pop_dens_change + pa_tot_ha_change + 
+                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik4,
+                        data = df_model)
+summary(second_stage4)
+
+# Combine second-stage models into a list
+second_stage_models_change <- list(
+  "t-1" = second_stage1,
+  "t-2" = second_stage2,
+  "t-3" = second_stage3,
+  "t-4" = second_stage4
+)
+# Create a summary table for second-stage models
+modelsummary(
+  second_stage_models_change,
+  output = "latex",
+  title = "Second Stage Estimates – Change in Area",
+  coef_map = c(
+    "fit_change_in_area" = "Change in Garimpo Area"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
+summary(second_stage1, stage = 1)
+summary(second_stage2, stage = 1)
+summary(second_stage3, stage = 1)
+summary(second_stage4, stage = 1)
+
+# multiple bartiks
+
+second_stage1B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | change_in_area ~ bartik,
                         data = df_model)
 summary(second_stage1B)
 
 second_stage2B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                        population_change + pop_dens_change + pa_tot_ha_change + 
-                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik2,
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          change_in_area ~ bartik + bartik2,
                         data = df_model)
 summary(second_stage2B)
 
 second_stage3B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                        population_change + pop_dens_change + pa_tot_ha_change + 
-                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik3,
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          change_in_area ~ bartik + bartik2 + bartik3,
                         data = df_model)
 summary(second_stage3B)
 
 second_stage4B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                        population_change + pop_dens_change + pa_tot_ha_change + 
-                        n_fined_change + brl_fined_change | year | change_in_area ~ bartik4,
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          change_in_area ~ bartik + bartik2 + bartik3 + bartik4,
                         data = df_model)
 summary(second_stage4B)
 
 # Combine second-stage models into a list
-second_stage_models_change <- list(
+second_stage_models_changeB <- list(
   "t-1" = second_stage1B,
   "t-2" = second_stage2B,
   "t-3" = second_stage3B,
   "t-4" = second_stage4B
 )
+
 # Create a summary table for second-stage models
 modelsummary(
   second_stage_models_change,
@@ -219,4 +275,3 @@ summary(second_stage1B, stage = 1)
 summary(second_stage2B, stage = 1)
 summary(second_stage3B, stage = 1)
 summary(second_stage4B, stage = 1)
-
