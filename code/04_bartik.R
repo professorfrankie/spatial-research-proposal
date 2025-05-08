@@ -150,11 +150,118 @@ second_stage4B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change +
 summary(second_stage4B)
 
 # Combine second-stage models into a list
-second_stage_models_change <- list(
+second_stage_models_changeB <- list(
   "t-1" = second_stage1B,
   "t-2" = second_stage2B,
   "t-3" = second_stage3B,
   "t-4" = second_stage4B
+)
+
+# Create a summary table for second-stage models
+modelsummary(
+  second_stage_models_change,
+  output = "latex",
+  title = "Second Stage Estimates – Change in Area",
+  coef_map = c(
+    "fit_garimpo_ha_change" = "Change in Garimpo Area"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
+summary(second_stage1B, stage = 1)
+summary(second_stage2B, stage = 1)
+summary(second_stage3B, stage = 1)
+summary(second_stage4B, stage = 1)
+
+
+second_stage5 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                         population_change + pop_dens_change + pa_tot_ha_change + 
+                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
+                       data = df_model)
+summary(second_stage5)
+
+second_stage6 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                         population_change + pop_dens_change + pa_tot_ha_change + 
+                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik2,
+                       data = df_model)
+summary(second_stage6)
+
+second_stage7 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                         population_change + pop_dens_change + pa_tot_ha_change + 
+                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik3,
+                       data = df_model)
+summary(second_stage7)
+
+second_stage8 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                         population_change + pop_dens_change + pa_tot_ha_change + 
+                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik4,
+                       data = df_model)
+summary(second_stage8)
+
+# Combine second-stage models into a list
+second_stage_forest_change <- list(
+  "t-1" = second_stage5,
+  "t-2" = second_stage6,
+  "t-3" = second_stage7,
+  "t-4" = second_stage8
+)
+# Create a summary table for second-stage models
+modelsummary(
+  second_stage_forest_change,
+  output = "latex",
+  title = "Second Stage Estimates – Change in Area",
+  coef_map = c(
+    "fit_garimpo_ha_change" = "Change in Garimpo Area"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
+summary(second_stage1, stage = 1)
+summary(second_stage2, stage = 1)
+summary(second_stage3, stage = 1)
+summary(second_stage4, stage = 1)
+
+# second stage with multiple bartiks
+
+second_stage5B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
+                        data = df_model)
+summary(second_stage5B)
+
+second_stage6B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          garimpo_ha_change ~ bartik + bartik2,
+                        data = df_model)
+summary(second_stage6B)
+
+second_stage7B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          garimpo_ha_change ~ bartik + bartik2 + bartik3,
+                        data = df_model)
+summary(second_stage7B)
+
+second_stage8B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | 
+                          garimpo_ha_change ~ bartik + bartik2 + bartik3 + bartik4,
+                        data = df_model)
+summary(second_stage8B)
+
+# Combine second-stage models into a list
+second_stage_forest_changeB <- list(
+  "t-1" = second_stage5B,
+  "t-2" = second_stage6B,
+  "t-3" = second_stage7B,
+  "t-4" = second_stage8B
 )
 
 # Create a summary table for second-stage models
