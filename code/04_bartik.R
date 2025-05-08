@@ -66,6 +66,13 @@ df_model <- df_bartik_final %>%
 na_count <- sum(is.na(df_model))
 colSums(is.na(df_model))
 
+######### FILTER GARIMPO ONLY ########
+df_model <- df_model |> 
+  group_by(muni_id, year) |>
+  filter(garimpo_ha > 0)
+
+####################################
+
 
 ###### SECOND STAGE #########
 
