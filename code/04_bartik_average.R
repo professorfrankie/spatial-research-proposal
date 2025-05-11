@@ -25,26 +25,10 @@ df_share <- df %>%
 sum(df_share$share_zi0)
 
 
-df_shift <- df |> 
-  mutate(
-    shift_1 = GoldPrice - lag(GoldPrice, 1),
-    shift_2 = GoldPrice - lag(GoldPrice, 2),
-    shift_3 = GoldPrice - lag(GoldPrice, 3),
-    shift_4 = GoldPrice - lag(GoldPrice, 4)
-  ) |> 
-  select(muni_id, year, shift_1, shift_2, shift_3, shift_4)
-
-
 df_bartik <- df |> 
   left_join(
     df_share,
     by = c("muni_id")
-  )
-
-df_bartik <- df_bartik |> 
-  left_join(
-    df_shift,
-    by = c("muni_id", "year")
   )
 
 

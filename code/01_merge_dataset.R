@@ -87,10 +87,15 @@ garimpo <- mining_spec |>
   filter(str_detect(substance, "artisanal")) |> 
   group_by(muni_id, year) |>
   summarise(garimpo_ha = sum(area_ha_mining, na.rm = TRUE), 
-            .groups = "drop") |> 
-  mutate(garimpo_ha_change = garimpo_ha - lag(garimpo_ha)) |>
+            .groups = "drop") |>
+  arrange(muni_id, year) |>
+  group_by(muni_id) |> 
+  mutate(garimpo_ha_change = garimpo_ha - lag(garimpo_ha),
+         garimpo_ha_change = if_else(is.na(garimpo_ha_change), garimpo_ha, garimpo_ha_change)) |> 
+  ungroup() |>
   filter(between(year, 2001, 2022)) |>
   mutate(muni_id = as.numeric(muni_id))
+
 
 gold <- read_csv("raw_data/annual.csv")
 gold_yearly <- gold |>
