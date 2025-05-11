@@ -96,7 +96,14 @@ gold <- read_csv("raw_data/annual.csv")
 gold_yearly <- gold |>
   rename(year = Date) |>
   rename(GoldPrice = Price) |>
+  mutate(
+    shift_1 = GoldPrice - lag(GoldPrice, 1),
+    shift_2 = GoldPrice - lag(GoldPrice, 2),
+    shift_3 = GoldPrice - lag(GoldPrice, 3),
+    shift_4 = GoldPrice - lag(GoldPrice, 4)
+  ) |>
   filter(between(year, 2001, 2022))
+
 
 #merge datasets
 
