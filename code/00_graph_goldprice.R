@@ -10,7 +10,15 @@ gold <- gold <- read_csv("raw_data/annual.csv") |>
     lag1 = Price - lag(Price, 1),
     lag2 = Price - lag(Price, 2),
     lag3 = Price - lag(Price, 3),
-    lag4 = Price - lag(Price, 4)
+    lag4 = Price - lag(Price, 4),
+    log_gold1 = log(Price)- log(lag(Price, 1)),
+    log_gold2 = log(Price)- log(lag(Price, 2)),
+    log_gold3 = log(Price)- log(lag(Price, 3)),
+    log_gold4 = log(Price)- log(lag(Price, 4)),
+    prc_gold1 = (Price - lag(Price, 1))/lag(Price, 1),
+    prc_gold2 = (Price - lag(Price, 2))/lag(Price, 2),
+    prc_gold3 = (Price - lag(Price, 3))/lag(Price, 3),
+    prc_gold4 = (Price - lag(Price, 4))/lag(Price, 4)
   ) |>
   filter(between(Date, 2002, 2022))
 
@@ -70,3 +78,37 @@ plot_all <- ggplot(gold, aes(x = Date)) +
   ) +
   theme_minimal()
 print(plot_all)         
+
+#plot the lod prices all together
+
+plot_log_all <- ggplot(gold, aes(x = Date)) +
+  geom_line(aes(y = log_gold1, color = "Log Lag 1"), linewidth = 1) +
+  geom_line(aes(y = log_gold2, color = "Log Lag 2"), linewidth = 1) +
+  geom_line(aes(y = log_gold3, color = "Log Lag 3"), linewidth = 1) +
+  geom_line(aes(y = log_gold4, color = "Log Lag 4"), linewidth = 1) +
+  geom_line(aes(y = 0), linewidth = 1) +
+  labs(
+    title = "Log Lagged Gold Prices",
+    x = "Year",
+    y = "Price",
+    color = "Legend"
+  ) +
+  theme_minimal()
+print(plot_log_all)
+
+#plot the prc prices all together
+
+plot_prc_all <- ggplot(gold, aes(x = Date)) +
+  geom_line(aes(y = prc_gold1, color = "Price Change Lag 1"), linewidth = 1) +
+  geom_line(aes(y = prc_gold2, color = "Price Change Lag 2"), linewidth = 1) +
+  geom_line(aes(y = prc_gold3, color = "Price Change Lag 3"), linewidth = 1) +
+  geom_line(aes(y = prc_gold4, color = "Price Change Lag 4"), linewidth = 1) +
+  geom_line(aes(y = 0), linewidth = 1) +
+  labs(
+    title = "Price Change Lagged Gold Prices",
+    x = "Year",
+    y = "Price",
+    color = "Legend"
+  ) +
+  theme_minimal()
+print(plot_prc_all)

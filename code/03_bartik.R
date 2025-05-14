@@ -275,3 +275,81 @@ summary(second_stage1B, stage = 1)
 summary(second_stage2B, stage = 1)
 summary(second_stage3B, stage = 1)
 summary(second_stage4B, stage = 1)
+
+############################################################
+#analysis 2001 garimpo
+
+# analyse 2005 garimpo 
+df_graph <- df_model |>
+  rename(
+    garimpo_ha = artisanal_mining_area_ha,
+    garimpo_ha_change = change_in_area
+  ) |>
+  group_by(muni_id) |>
+  filter(any(garimpo_ha > 0, na.rm = TRUE)) |>  # <-- filter out municipalities with no garimpo ever
+  summarize(
+    garimpo_flag_2001 = as.integer(any(share_zi0 > 0, na.rm = TRUE)),
+    garimpo_2022 = sum(garimpo_ha[year == 2022], na.rm = TRUE),
+    garimpo_2002 = sum(garimpo_ha[year == 2002], na.rm = TRUE)
+  ) |>
+  mutate(
+    garimpo_change_02_22 = garimpo_2022 - garimpo_2002
+  ) |>
+  select(muni_id, garimpo_flag_2001, garimpo_change_02_22)
+
+df_graph |> count(garimpo_flag_2001)
+#print the municipalities with no garimpo in 2005
+df_graph |> filter(garimpo_flag_2001 == 0) |> 
+  select(muni_id, garimpo_flag_2005, garimpo_change_06_22)
+
+
+legal_amazon <- read_sf("raw_data/Limites_Amazonia_Legal_2022.shp") %>%
+  st_set_crs(4674) %>%
+  st_transform(crs = 4674)
+
+muni_sf <- read_municipality(year = 2022, showProgress = FALSE) %>%
+  mutate(muni_id = as.numeric(code_muni)) |>
+  select(muni_id, geom) %>%
+  st_transform(4674)
+
+df_graph <- muni_sf %>%
+  left_join(df_graph, by = "muni_id") 
+
+data("municipalities")
+legal_amazon_munis <- municipalities %>%
+  filter(legal_amazon == 1) %>%
+  pull(code_muni)
+
+df_graph <- df_graph |>
+  filter(muni_id %in% legal_amazon_munis) 
+
+df_model1 <- muni_sf %>%
+  left_join(df_model, by = "muni_id") 
+
+ggplot() +
+  # Base map: Legal Amazon region (light gray/white fill)
+  geom_sf(data = legal_amazon, fill = "white", alpha = 0.3) +
+  # Main layer: fill by garimpo change, black border
+  geom_sf(data = df_graph, aes(fill = garimpo_change_02_22), color = "black", size = 0.5) +
+  # Yellow contour for municipalities without mining in 2005
+  geom_sf(
+    data = df_model1 |> 
+      group_by(muni_id) |> 
+      filter(any(share_zi0 == 0, na.rm = TRUE) & any(change_in_area > 0, na.rm = TRUE)) |> 
+      ungroup()
+    ,
+    fill = NA, color = "red", size = 2
+  ) +
+  # Fill scale for mining change
+  scale_fill_viridis_c(direction = -1, option = "D", name = "Change in Garimpo ha",
+                       na.value = "white") +
+  # Labels and theme
+  labs(title = "Change in Garimpo Area by Municipality in the Brazilian Legal Amazon (2002 vs 2022)",
+       subtitle = "with highlighted the municipalities with no garimpo in 2001") +
+  theme_void() +
+  theme(
+    plot.title.position = "plot",
+    plot.title = element_markdown(size = 16, face = "bold")
+  ) +
+  # Optional coordinate cropping
+  coord_sf(ylim = c(-19, 6))
