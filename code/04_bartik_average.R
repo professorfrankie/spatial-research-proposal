@@ -111,6 +111,29 @@ summary(second_stage2, stage = 1)
 summary(second_stage3, stage = 1)
 summary(second_stage4, stage = 1)
 
+first_stage_models_change <- list(
+  "t-1" = summary(second_stage1, stage = 1),
+  "t-2" = summary(second_stage2, stage = 1),
+  "t-3" = summary(second_stage3, stage = 1),
+  "t-4" = summary(second_stage4, stage = 1)
+)
+
+modelsummary(
+  first_stage_models_change,
+  output = "latex",
+  title = "Second Stage Estimates – Change in Area",
+  coef_map = c(
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
 # second stage with multiple bartiks
 
 second_stage1B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
@@ -150,7 +173,7 @@ second_stage_models_changeB <- list(
 
 # Create a summary table for second-stage models
 modelsummary(
-  second_stage_models_change,
+  second_stage_models_changeB,
   output = "latex",
   title = "Second Stage Estimates – Change in Area",
   coef_map = c(
@@ -166,6 +189,31 @@ summary(second_stage1B, stage = 1)
 summary(second_stage2B, stage = 1)
 summary(second_stage3B, stage = 1)
 summary(second_stage4B, stage = 1)
+
+fist_stage_models_changeB <- list(
+  "Model 1" = summary(second_stage1B, stage = 1),
+  "Model 2" = summary(second_stage2B, stage = 1),
+  "Model 3" = summary(second_stage3B, stage = 1),
+  "Model 4" = summary(second_stage4B, stage = 1)
+)
+
+modelsummary(
+  fist_stage_models_changeB,
+  output = "latex",
+  title = "Second Stage Estimates – Change in Area",
+  coef_map = c(
+    "bartik" = "Bartik t-1",
+    "bartik2" = "Bartik t-2",
+    "bartik3" = "Bartik t-3",  
+    "bartik4" = "Bartik t-4"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
+
 
 
 second_stage5 <- feols(forest_change ~ spei_dry + gdp_pc_change + 

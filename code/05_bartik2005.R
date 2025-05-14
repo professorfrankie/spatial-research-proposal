@@ -146,6 +146,29 @@ summary(second_stage2, stage = 1)
 summary(second_stage3, stage = 1)
 summary(second_stage4, stage = 1)
 
+first_stage_models_change <- list(
+  "t-1" = summary(second_stage1, stage = 1),
+  "t-2" = summary(second_stage2, stage = 1),
+  "t-3" = summary(second_stage3, stage = 1),
+  "t-4" = summary(second_stage4, stage = 1)
+)
+
+modelsummary(
+  first_stage_models_change,
+  output = "latex",
+  title = "First Stage Estimates – Change in Area",
+  coef_map = c(
+    "bartik" = "Bartik",
+    "bartik2" = "Bartik",
+    "bartik3" = "Bartik",
+    "bartik4" = "Bartik"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
 # second stage with multiple bartiks
 
 second_stage1B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
@@ -202,6 +225,30 @@ summary(second_stage2B, stage = 1)
 summary(second_stage3B, stage = 1)
 summary(second_stage4B, stage = 1)
 
+# Combine first-stage models into a list
+first_stage_models_changeB <- list(
+  "Model 1" = summary(second_stage1B, stage = 1),
+  "Model 2" = summary(second_stage2B, stage = 1),
+  "Model 3" = summary(second_stage3B, stage = 1),
+  "Model 4" = summary(second_stage4B, stage = 1)
+)
+
+modelsummary(
+  first_stage_models_changeB,
+  output = "latex",
+  title = "First Stage Estimates – Change in Area",
+  coef_map = c(
+    "bartik" = "Bartik t-1",
+    "bartik2" = "Bartik t-2",
+    "bartik3" = "Bartik t-3",
+    "bartik4" = "Bartik t-4"
+  ),
+  statistic = c("({std.error})", "p.value"),
+  stars = TRUE,
+  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
+  escape = FALSE
+)
+
 ###############################################################################
 # analyse 2005 garimpo 
 df_graph <- df_2005 |>
@@ -241,7 +288,10 @@ legal_amazon_munis <- municipalities %>%
   pull(code_muni)
 
 df_graph <- df_graph |>
-  filter(muni_id %in% legal_amazon_munis)
+  filter(muni_id %in% legal_amazon_munis) 
+
+df_model1 <- muni_sf %>%
+  left_join(df_model, by = "muni_id") 
 
 ggplot() +
   # Base map: Legal Amazon region (light gray/white fill)
@@ -250,7 +300,11 @@ ggplot() +
   geom_sf(data = df_graph, aes(fill = garimpo_change_06_22), color = "black", size = 0.5) +
   # Yellow contour for municipalities without mining in 2005
   geom_sf(
-    data = df_graph |> filter(garimpo_flag_2005 == 0),
+    data = df_model1 |> 
+      group_by(muni_id) |> 
+      filter(any(share_zi0 == 0, na.rm = TRUE) & any(garimpo_ha_change > 0, na.rm = TRUE)) |> 
+      ungroup()
+    ,
     fill = NA, color = "red", size = 2
   ) +
   # Fill scale for mining change
