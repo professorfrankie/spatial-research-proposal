@@ -105,7 +105,15 @@ gold_yearly <- gold |>
     shift_1 = GoldPrice - lag(GoldPrice, 1),
     shift_2 = GoldPrice - lag(GoldPrice, 2),
     shift_3 = GoldPrice - lag(GoldPrice, 3),
-    shift_4 = GoldPrice - lag(GoldPrice, 4)
+    shift_4 = GoldPrice - lag(GoldPrice, 4),
+    log_gold1 = log(GoldPrice)- log(lag(GoldPrice, 1)),
+    log_gold2 = log(GoldPrice)- log(lag(GoldPrice, 2)),
+    log_gold3 = log(GoldPrice)- log(lag(GoldPrice, 3)),
+    log_gold4 = log(GoldPrice)- log(lag(GoldPrice, 4)),
+    prc_gold1 = (GoldPrice - lag(GoldPrice, 1))/lag(GoldPrice, 1),
+    prc_gold2 = (GoldPrice - lag(GoldPrice, 2))/lag(GoldPrice, 2),
+    prc_gold3 = (GoldPrice - lag(GoldPrice, 3))/lag(GoldPrice, 3),
+    prc_gold4 = (GoldPrice - lag(GoldPrice, 4))/lag(GoldPrice, 4)
   ) |>
   filter(between(year, 2001, 2022))
 
