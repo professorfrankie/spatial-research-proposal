@@ -31,7 +31,8 @@ df_bartik <- df |>
     by = c("muni_id")
   )
 
-
+####################################################
+# using difference in gold price
 df_bartik_final <- df_bartik |> 
   mutate(
     bartik = shift_1 * share_zi0,
@@ -39,6 +40,28 @@ df_bartik_final <- df_bartik |>
     bartik3 = shift_3 * share_zi0,
     bartik4 = shift_4 * share_zi0
   )
+
+####################################################
+# using difference in log gold price
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = log_gold1 * share_zi0,
+    bartik2 = log_gold2 * share_zi0,
+    bartik3 = log_gold3 * share_zi0,
+    bartik4 = log_gold4 * share_zi0
+  )
+
+####################################################
+# using percentage price change
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = prc_gold1 * share_zi0,
+    bartik2 = prc_gold2 * share_zi0,
+    bartik3 = prc_gold3 * share_zi0,
+    bartik4 = prc_gold4 * share_zi0
+  )
+
+#####################################################
 
 ## REGRESSION: Reduced form
 # Join temporarily
