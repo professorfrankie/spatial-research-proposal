@@ -1,5 +1,6 @@
 library(dplyr)
 library(readxl)
+library(factoextra)
 
 # Load the data
 df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx", 
@@ -45,6 +46,15 @@ cov_matrix <- cov(df_std)
 
 pca <- prcomp(df_std, center = TRUE, scale. = TRUE)
 summary(pca)
+biplot(pca) 
+
+# Highlight Gold and Oil only
+fviz_pca_biplot(pca,
+                label = "var",
+                col.var = "black",
+                select.var = list(name = c("Gold\n($/troy oz)", "Rice, Thai A.1\n($/mt)", "Plywood\n(¢/sheet)")),
+                repel = TRUE)
+
 
 loadings <- pca$rotation  # Columns = PCs, Rows = original variables
 print(loadings)
@@ -66,17 +76,3 @@ most_orthogonal <- names(which.min(abs(cosine_sim)))
 # Print results
 cat("Most similar to Gold:", most_similar, "\n")
 cat("Most orthogonal to Gold:", most_orthogonal, "\n")
-
-library(ggplot2)
-
-df_loadings <- as.data.frame(loadings[, 1:2])
-df_loadings$Commodity <- rownames(df_loadings)
-
-ggplot(df_loadings, aes(x = PC1, y = PC2, label = Commodity)) +
-  geom_point() +
-  geom_text(nudge_y = 0.02) +
-  coord_equal() +
-  ggtitle("Commodity Loadings in PCA Space")
-
-
-
