@@ -145,3 +145,12 @@ colSums(is.na(df_amazon))
 
 write.csv(df_amazon, 
           "processed_data/df_amazon_new.csv")
+
+####################### DATA FOR QGIS ###############################
+
+df_amazon_qgis <- df_amazon |> 
+  select(muni_id, year, garimpo_ha, garimpo_ha_change)
+
+write.csv(df_amazon_qgis, 
+          "processed_data/df_amazon_qgis.csv", 
+          row.names = FALSE)
