@@ -15,22 +15,18 @@ df <- df_raw[-c(1,2), ] %>%
   rename(
     year = `NA\nNA`  
   ) %>%
-  select(-c(
-    `Crude oil, Brent\n($/bbl)`,
-    `Crude oil, Dubai\n($/bbl)`,
-    `Crude oil, WTI\n($/bbl)`,
-    `Natural gas, US\n($/mmbtu)`,
-    `Natural gas, Europe\n($/mmbtu)`,
-    `Liquefied natural gas, Japan\n($/mmbtu)`,
-    `Tea, Colombo\n($/kg)`,
-    `Tea, Kolkata\n($/kg)`,
-    `Tea, Mombasa\n($/kg)`,
-    `Sugar, EU\n($/kg)`,
-    `Sugar, US\n($/kg)`,
-    `Rice, Thai 25%\n($/mt)`,
-    `Rice, Viet Namese 5%\n($/mt)`,
-    `Sorghum\n($/mt)`,
-    `Barley\n($/mt)`
+  select(c(
+    year,
+    `Platinum\n($/troy oz)`,
+    `Gold\n($/troy oz)`,
+    `Silver\n($/troy oz)`,
+    `Zinc\n($/mt)`,
+    `Nickel\n($/mt)`,
+    `Tin\n($/mt)`,
+    `Copper\n($/mt)`,
+    `Lead\n($/mt)`,
+    `Iron ore, cfr spot\n($/dmtu)`,
+    `Phosphate rock\n($/mt)`
   )) %>%
   filter(year >= 2000 & year <= 2022)
 
@@ -52,7 +48,7 @@ biplot(pca)
 fviz_pca_biplot(pca,
                 label = "var",
                 col.var = "black",
-                select.var = list(name = c("Gold\n($/troy oz)", "Rice, Thai A.1\n($/mt)", "Plywood\n(¢/sheet)")),
+                select.var = list(name = c("Gold\n($/troy oz)", "Zinc\n($/mt)", "Nickel\n($/mt)")),
                 repel = TRUE)
 
 

@@ -11,6 +11,7 @@ library(modelsummary)
 df <- read_csv("processed_data/df_amazon_new.csv") |> 
   select(-c(...1, forest, gdp_pc, population, pop_dens, pa_tot_ha, n_fined, brl_fined))
 
+### filter for the correct years!!!!
 
 df_share <- df %>%
   group_by(muni_id) %>%
