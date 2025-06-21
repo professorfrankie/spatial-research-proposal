@@ -138,6 +138,8 @@ legal_amazon_munis <- municipalities %>%
 df_amazon <- df |> 
   filter(muni_id %in% legal_amazon_munis)
 
+unique(df_amazon$muni_id)
+
 na_count <- sum(is.na(df_amazon))
 colSums(is.na(df_amazon))
 
