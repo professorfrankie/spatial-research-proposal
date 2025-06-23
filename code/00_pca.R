@@ -4,7 +4,7 @@ library(factoextra)
 
 # Load the data
 df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx", 
-                   sheet = "Annual Prices (Nominal)",
+                   sheet = "Annual Prices (Real)",
                    skip = 5, 
                    col_names = FALSE)
 
@@ -48,7 +48,7 @@ biplot(pca)
 fviz_pca_biplot(pca,
                 label = "var",
                 col.var = "black",
-                select.var = list(name = c("Gold\n($/troy oz)", "Zinc\n($/mt)", "Nickel\n($/mt)")),
+                select.var = list(name = c("Gold\n($/troy oz)", "Tin\n($/mt)", "Iron ore, cfr spot\n($/dmtu)")),
                 repel = TRUE)
 
 
