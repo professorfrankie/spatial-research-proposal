@@ -8,10 +8,9 @@ library(fixest)
 library(modelsummary)
 
 
-df <- read_csv("processed_data/df_amazon_new.csv") |> 
-  select(-c(...1, forest, gdp_pc, population, pop_dens, pa_tot_ha, n_fined, brl_fined))
-
-### filter for the correct years!!!!
+df <- read_csv("processed_data/df_amazon_newpca.csv") |> 
+  select(-c(...1, forest, gdp_pc, population, pop_dens, pa_tot_ha, n_fined, brl_fined)) |> 
+  filter(between(year, 2002, 2022))
 
 df_share <- df %>%
   group_by(muni_id) %>%
@@ -36,10 +35,10 @@ df_bartik <- df |>
 # using difference in gold price
 df_bartik_final <- df_bartik |> 
   mutate(
-    bartik = shift_1 * share_zi0,
-    bartik2 = shift_2 * share_zi0,
-    bartik3 = shift_3 * share_zi0,
-    bartik4 = shift_4 * share_zi0
+    bartik = shift_gold1 * share_zi0,
+    bartik2 = shift_gold2 * share_zi0,
+    bartik3 = shift_gold3 * share_zi0,
+    bartik4 = shift_gold4 * share_zi0
   )
 
 ####################################################
@@ -60,6 +59,66 @@ df_bartik_final <- df_bartik |>
     bartik2 = prc_gold2 * share_zi0,
     bartik3 = prc_gold3 * share_zi0,
     bartik4 = prc_gold4 * share_zi0
+  )
+
+####################################################
+# using difference in tin price
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = shift_tin1 * share_zi0,
+    bartik2 = shift_tin2 * share_zi0,
+    bartik3 = shift_tin3 * share_zi0,
+    bartik4 = shift_tin4 * share_zi0
+  )
+
+####################################################
+# using difference in log tin price
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = log_tin1 * share_zi0,
+    bartik2 = log_tin2 * share_zi0,
+    bartik3 = log_tin3 * share_zi0,
+    bartik4 = log_tin4 * share_zi0
+  )
+
+#####################################################
+# using percentage price change
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = prc_tin1 * share_zi0,
+    bartik2 = prc_tin2 * share_zi0,
+    bartik3 = prc_tin3 * share_zi0,
+    bartik4 = prc_tin4 * share_zi0
+  )
+
+####################################################
+# using difference in iron ore price
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = shift_iron1 * share_zi0,
+    bartik2 = shift_iron2 * share_zi0,
+    bartik3 = shift_iron3 * share_zi0,
+    bartik4 = shift_iron4 * share_zi0
+  )
+
+###################################################
+# using difference in log iron ore price
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = log_iron1 * share_zi0,
+    bartik2 = log_iron2 * share_zi0,
+    bartik3 = log_iron3 * share_zi0,
+    bartik4 = log_iron4 * share_zi0
+  )
+
+##################################################
+# using percentage price change
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik = prc_iron1 * share_zi0,
+    bartik2 = prc_iron2 * share_zi0,
+    bartik3 = prc_iron3 * share_zi0,
+    bartik4 = prc_iron4 * share_zi0
   )
 
 #####################################################

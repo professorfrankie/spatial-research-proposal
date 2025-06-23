@@ -96,7 +96,74 @@ garimpo <- mining_spec |>
   filter(between(year, 1985, 2022)) |>
   mutate(muni_id = as.numeric(muni_id))
 
+# REAL PRICES
+df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx", 
+                     sheet = "Annual Prices (Real)",
+                     skip = 5, 
+                     col_names = FALSE)
 
+colnames(df_raw) <- paste(df_raw[1, ], df_raw[2, ], sep = "\n")
+
+# Remove the first two rows from the data
+real_prices <- df_raw[-c(1,2), ] %>%
+  rename(
+    year = `NA\nNA`  
+  ) %>%
+  select(c(
+    year,
+    `Gold\n($/troy oz)`,
+    `Tin\n($/mt)`,
+    `Iron ore, cfr spot\n($/dmtu)`
+  ))
+
+shifts <- real_prices %>%
+  mutate(
+    year = as.numeric(year),
+    `Gold\n($/troy oz)` = as.numeric(`Gold\n($/troy oz)`),
+    `Tin\n($/mt)` = as.numeric(`Tin\n($/mt)`),
+    `Iron ore, cfr spot\n($/dmtu)` = as.numeric(`Iron ore, cfr spot\n($/dmtu)`)
+  ) %>%
+  mutate(
+    shift_gold1 = `Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 1),
+    shift_gold2 = `Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 2),
+    shift_gold3 = `Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 3),
+    shift_gold4 = `Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 4),
+    log_gold1 = log(`Gold\n($/troy oz)`)- log(lag(`Gold\n($/troy oz)`, 1)),
+    log_gold2 = log(`Gold\n($/troy oz)`)- log(lag(`Gold\n($/troy oz)`, 2)),
+    log_gold3 = log(`Gold\n($/troy oz)`)- log(lag(`Gold\n($/troy oz)`, 3)),
+    log_gold4 = log(`Gold\n($/troy oz)`)- log(lag(`Gold\n($/troy oz)`, 4)),
+    prc_gold1 = (`Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 1))/lag(`Gold\n($/troy oz)`, 1),
+    prc_gold2 = (`Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 2))/lag(`Gold\n($/troy oz)`, 2),
+    prc_gold3 = (`Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 3))/lag(`Gold\n($/troy oz)`, 3),
+    prc_gold4 = (`Gold\n($/troy oz)` - lag(`Gold\n($/troy oz)`, 4))/lag(`Gold\n($/troy oz)`, 4),
+    shift_tin1 = `Tin\n($/mt)` - lag(`Tin\n($/mt)`, 1),
+    shift_tin2 = `Tin\n($/mt)` - lag(`Tin\n($/mt)`, 2),
+    shift_tin3 = `Tin\n($/mt)` - lag(`Tin\n($/mt)`, 3),
+    shift_tin4 = `Tin\n($/mt)` - lag(`Tin\n($/mt)`, 4),
+    log_tin1 = log(`Tin\n($/mt)`)- log(lag(`Tin\n($/mt)`, 1)),
+    log_tin2 = log(`Tin\n($/mt)`)- log(lag(`Tin\n($/mt)`, 2)),
+    log_tin3 = log(`Tin\n($/mt)`)- log(lag(`Tin\n($/mt)`, 3)),
+    log_tin4 = log(`Tin\n($/mt)`)- log(lag(`Tin\n($/mt)`, 4)),
+    prc_tin1 = (`Tin\n($/mt)` - lag(`Tin\n($/mt)`, 1))/lag(`Tin\n($/mt)`, 1),
+    prc_tin2 = (`Tin\n($/mt)` - lag(`Tin\n($/mt)`, 2))/lag(`Tin\n($/mt)`, 2),
+    prc_tin3 = (`Tin\n($/mt)` - lag(`Tin\n($/mt)`, 3))/lag(`Tin\n($/mt)`, 3),
+    prc_tin4 = (`Tin\n($/mt)` - lag(`Tin\n($/mt)`, 4))/lag(`Tin\n($/mt)`, 4),
+    shift_iron1 = `Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 1),
+    shift_iron2 = `Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 2),
+    shift_iron3 = `Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 3),
+    shift_iron4 = `Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 4),
+    log_iron1 = log(`Iron ore, cfr spot\n($/dmtu)`)- log(lag(`Iron ore, cfr spot\n($/dmtu)`, 1)),
+    log_iron2 = log(`Iron ore, cfr spot\n($/dmtu)`)- log(lag(`Iron ore, cfr spot\n($/dmtu)`, 2)),
+    log_iron3 = log(`Iron ore, cfr spot\n($/dmtu)`)- log(lag(`Iron ore, cfr spot\n($/dmtu)`, 3)),
+    log_iron4 = log(`Iron ore, cfr spot\n($/dmtu)`)- log(lag(`Iron ore, cfr spot\n($/dmtu)`, 4)),
+    prc_iron1 = (`Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 1))/lag(`Iron ore, cfr spot\n($/dmtu)`, 1),
+    prc_iron2 = (`Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 2))/lag(`Iron ore, cfr spot\n($/dmtu)`, 2),
+    prc_iron3 = (`Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 3))/lag(`Iron ore, cfr spot\n($/dmtu)`, 3),
+    prc_iron4 = (`Iron ore, cfr spot\n($/dmtu)` - lag(`Iron ore, cfr spot\n($/dmtu)`, 4))/lag(`Iron ore, cfr spot\n($/dmtu)`, 4)
+  ) %>%
+  filter(year >= 1985 & year <= 2022)
+
+# other price
 gold <- read_csv("raw_data/annual.csv")
 gold_yearly <- gold |>
   rename(year = Date) |>
@@ -122,7 +189,7 @@ gold_yearly <- gold |>
 
 df <- transition |> 
   left_join(controls, by = c("muni_id", "year")) |>
-  left_join(gold_yearly, by = c("year")) |> 
+  left_join(shifts, by = c("year")) |> 
   left_join(garimpo, by = c("muni_id", "year")) |>
   mutate(
     garimpo_ha_change = ifelse(is.na(garimpo_ha_change), 0, garimpo_ha_change),
@@ -144,7 +211,7 @@ na_count <- sum(is.na(df_amazon))
 colSums(is.na(df_amazon))
 
 write.csv(df_amazon, 
-          "processed_data/df_amazon_new.csv")
+          "processed_data/df_amazon_newpca.csv")
 
 ####################### DATA FOR QGIS ###############################
 
