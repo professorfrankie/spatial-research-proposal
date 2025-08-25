@@ -140,7 +140,13 @@ df_model <- df_model |>
 
 ####################################
 
+####### OLS #########
+ols_model <- feols(forest_loss_all_gross ~ garimpo_ha + spei_dry + gdp_pc_change + 
+                     population_change + pop_dens_change + pa_tot_ha_change + 
+                     n_fined_change + brl_fined_change | year,
+                   data = df_model)
 
+###### IV SPECIFICATION #########
 ###### SECOND STAGE #########
 
 # second stage for change_in_area
