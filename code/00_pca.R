@@ -1,21 +1,23 @@
+# --- 0) Packages --------------------------------------------------------------
 library(dplyr)
 library(readxl)
 library(factoextra)
 
-# Load the data
-df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx", 
-                   sheet = "Annual Prices (Real)",
-                   skip = 5, 
-                   col_names = FALSE)
+# --- 1) Load & prepare the data ----------------------------------------------
+df_raw <- read_excel(
+  "raw_data/CMO-Historical-Data-Annual.xlsx",
+  sheet = "Annual Prices (Real)",
+  skip = 5,
+  col_names = FALSE
+)
 
+# Use the first two rows as a two-line header
 colnames(df_raw) <- paste(df_raw[1, ], df_raw[2, ], sep = "\n")
 
-# Remove the first two rows from the data
-df <- df_raw[-c(1,2), ] %>%
-  rename(
-    year = `NA\nNA`  
-  ) %>%
-  select(c(
+# Keep year + selected commodities, 1985–2023
+df <- df_raw[-c(1, 2), ] %>%
+  rename(year = `NA\nNA`) %>%
+  select(
     year,
     `Platinum\n($/troy oz)`,
     `Gold\n($/troy oz)`,
@@ -27,48 +29,68 @@ df <- df_raw[-c(1,2), ] %>%
     `Lead\n($/mt)`,
     `Iron ore, cfr spot\n($/dmtu)`,
     `Phosphate rock\n($/mt)`
-  )) %>%
-  filter(year >= 2000 & year <= 2022)
+  ) %>%
+  mutate(
+    year = as.integer(as.character(year)),
+    across(-year, ~ as.numeric(.))
+  ) %>%
+  filter(year >= 1985, year <= 2023)
 
-#standardize the data
-df_std <- df %>%
+# --- 2) Standardize the predictors (not the year) -----------------------------
+X_std <- df %>%
   select(-year) %>%
-  mutate(across(everything(), as.numeric)) %>%
   scale() %>%
   as.data.frame()
 
-#variance-covariance matrix
-cov_matrix <- cov(df_std)
+# --- 3) PCA on standardized data (avoid double-scaling) -----------------------
+pca <- prcomp(X_std, center = FALSE, scale. = FALSE)
 
-pca <- prcomp(df_std, center = TRUE, scale. = TRUE)
-summary(pca)
-biplot(pca) 
+# Quick diagnostics (optional)
+# summary(pca)
+# fviz_pca_biplot(pca, label = "var", repel = TRUE)
 
-# Highlight Gold and Oil only
-fviz_pca_biplot(pca,
-                label = "var",
-                col.var = "black",
-                select.var = list(name = c("Gold\n($/troy oz)", "Tin\n($/mt)", "Iron ore, cfr spot\n($/dmtu)")),
-                repel = TRUE)
+# --- 4) Identify PCs relative to Gold -----------------------------------------
+loadings <- pca$rotation                 # rows = variables, cols = PCs
+gold_loadings <- loadings["Gold\n($/troy oz)", ]  # Gold’s loading across PCs
 
+# PC most aligned with Gold: largest |loading|
+pc_most_similar <- names(which.max(abs(gold_loadings)))
 
-loadings <- pca$rotation  # Columns = PCs, Rows = original variables
-print(loadings)
+# PC most orthogonal to Gold: smallest |loading|
+pc_most_orthogonal <- names(which.min(abs(gold_loadings)))
 
-gold_vector <- loadings["Gold\n($/troy oz)", ]
+# Variance explained (for context)
+var_explained <- (pca$sdev^2) / sum(pca$sdev^2)
+names(var_explained) <- colnames(loadings)
 
-# Cosine similarity between gold and others
-cosine_sim <- apply(loadings, 1, function(x) sum(x * gold_vector) / (sqrt(sum(x^2)) * sqrt(sum(gold_vector^2))))
+cat("PC most aligned with Gold:", pc_most_similar,
+    "| |Gold loading| =", round(abs(gold_loadings[pc_most_similar]), 3),
+    "| Var explained =", round(100 * var_explained[pc_most_similar], 1), "%\n")
 
-# Remove gold from comparison
-cosine_sim <- cosine_sim[names(cosine_sim) != "Gold\n($/troy oz)"]
+cat("PC most orthogonal to Gold:", pc_most_orthogonal,
+    "| |Gold loading| =", round(abs(gold_loadings[pc_most_orthogonal]), 3),
+    "| Var explained =", round(100 * var_explained[pc_most_orthogonal], 1), "%\n")
 
-# Most aligned (cosine ~ 1)
-most_similar <- names(which.max(cosine_sim))
+# --- 5) Build shock time series (scores along those PCs) ----------------------
+scores <- as.data.frame(pca$x)  # rows = years, cols = PCs (same order as df)
 
-# Most orthogonal (cosine ~ 0)
-most_orthogonal <- names(which.min(abs(cosine_sim)))
+# Orient the “Gold-aligned” PC so a positive score corresponds to a positive Gold loading
+gold_sign <- sign(gold_loadings[pc_most_similar])
+gold_aligned_shock <- gold_sign * scores[[pc_most_similar]]
 
-# Print results
-cat("Most similar to Gold:", most_similar, "\n")
-cat("Most orthogonal to Gold:", most_orthogonal, "\n")
+# Orthogonal PC’s sign is arbitrary; we keep it as is
+gold_orthogonal_shock <- scores[[pc_most_orthogonal]]
+
+df_shocks <- df %>%
+  transmute(
+    year,
+    gold_aligned_shock    = gold_aligned_shock,
+    gold_orthogonal_shock = gold_orthogonal_shock
+  )
+
+print(head(df_shocks, 10))
+
+# --- 6) (Optional) sanity checks / visuals ------------------------------------
+# Barplot of |Gold| loadings across PCs
+# barplot(abs(gold_loadings), las = 2, ylab = "|loading|", main = "Gold loading across PCs")
+
