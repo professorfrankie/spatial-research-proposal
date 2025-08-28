@@ -195,6 +195,18 @@ modelsummary(
   escape = FALSE
 )
 
+etable(
+  second_stage_models_change,
+  dict = c(fit_garimpo_ha_change = "Change in Garimpo Area",
+           forest_loss_all_gross = "Forest Loss"),
+  fitstat = ~ n + r2 + ar2 + f + ivf,
+  keep = "%fit_garimpo_ha_change",   # % = original variable name
+  headers = c("t-1", "t-2", "t-3", "t-4"),
+  tex = TRUE,
+  title = "Second Stage Estimates – Change in Area"
+)
+
+
 summary(second_stage1, stage = 1)
 summary(second_stage2, stage = 1)
 summary(second_stage3, stage = 1)
