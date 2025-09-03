@@ -14,7 +14,7 @@ df_raw <- read_excel(
 # Use the first two rows as a two-line header
 colnames(df_raw) <- paste(df_raw[1, ], df_raw[2, ], sep = "\n")
 
-# Keep year + selected commodities, 1985–2023
+# Keep year + selected commodities, 2002–2022
 df <- df_raw[-c(1, 2), ] %>%
   rename(year = `NA\nNA`) %>%
   select(
@@ -34,7 +34,7 @@ df <- df_raw[-c(1, 2), ] %>%
     year = as.integer(as.character(year)),
     across(-year, ~ as.numeric(.))
   ) %>%
-  filter(year >= 1985, year <= 2023)
+  filter(year >= 2002, year <= 2022)
 
 # --- 2) Standardize the predictors (not the year) -----------------------------
 X_std <- df %>%
@@ -89,6 +89,12 @@ df_shocks <- df %>%
   )
 
 print(head(df_shocks, 10))
+
+write.csv(
+  df_shocks,
+  "processed_data/pca_shocks.csv",
+  row.names = FALSE
+)
 
 # --- 6) (Optional) sanity checks / visuals ------------------------------------
 # Barplot of |Gold| loadings across PCs

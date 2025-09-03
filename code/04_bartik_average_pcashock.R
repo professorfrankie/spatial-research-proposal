@@ -31,97 +31,22 @@ df_bartik <- df |>
     by = c("muni_id")
   )
 
-####################################################
-# using difference in gold price
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = shift_gold1 * share_zi0,
-    bartik2 = shift_gold2 * share_zi0,
-    bartik3 = shift_gold3 * share_zi0,
-    bartik4 = shift_gold4 * share_zi0
+pca_shocks <- read.csv("processed_data/pca_shocks.csv")
+
+df_bartik <- df_bartik |> 
+  left_join(
+    pca_shocks,
+    by = c("year")
   )
 
 ####################################################
-# using difference in log gold price
+# using gold pca shock
 df_bartik_final <- df_bartik |> 
   mutate(
-    bartik = log_gold1 * share_zi0,
-    bartik2 = log_gold2 * share_zi0,
-    bartik3 = log_gold3 * share_zi0,
-    bartik4 = log_gold4 * share_zi0
+    bartik_align = gold_aligned_shock * share_zi0,
+    bartik_orth = gold_orthogonal_shock * share_zi0
   )
 
-####################################################
-# using percentage price change
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = prc_gold1 * share_zi0,
-    bartik2 = prc_gold2 * share_zi0,
-    bartik3 = prc_gold3 * share_zi0,
-    bartik4 = prc_gold4 * share_zi0
-  )
-
-####################################################
-# using difference in tin price
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = shift_tin1 * share_zi0,
-    bartik2 = shift_tin2 * share_zi0,
-    bartik3 = shift_tin3 * share_zi0,
-    bartik4 = shift_tin4 * share_zi0
-  )
-
-####################################################
-# using difference in log tin price
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = log_tin1 * share_zi0,
-    bartik2 = log_tin2 * share_zi0,
-    bartik3 = log_tin3 * share_zi0,
-    bartik4 = log_tin4 * share_zi0
-  )
-
-#####################################################
-# using percentage price change
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = prc_tin1 * share_zi0,
-    bartik2 = prc_tin2 * share_zi0,
-    bartik3 = prc_tin3 * share_zi0,
-    bartik4 = prc_tin4 * share_zi0
-  )
-
-####################################################
-# using difference in iron ore price
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = shift_iron1 * share_zi0,
-    bartik2 = shift_iron2 * share_zi0,
-    bartik3 = shift_iron3 * share_zi0,
-    bartik4 = shift_iron4 * share_zi0
-  )
-
-###################################################
-# using difference in log iron ore price
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = log_iron1 * share_zi0,
-    bartik2 = log_iron2 * share_zi0,
-    bartik3 = log_iron3 * share_zi0,
-    bartik4 = log_iron4 * share_zi0
-  )
-
-##################################################
-# using percentage price change
-df_bartik_final <- df_bartik |> 
-  mutate(
-    bartik = prc_iron1 * share_zi0,
-    bartik2 = prc_iron2 * share_zi0,
-    bartik3 = prc_iron3 * share_zi0,
-    bartik4 = prc_iron4 * share_zi0
-  )
-
-#####################################################
 
 ## REGRESSION: Reduced form
 # Join temporarily
@@ -152,48 +77,15 @@ ols_model <- feols(forest_loss_all_gross ~ garimpo_ha_change + spei_dry + gdp_pc
 # second stage for change_in_area
 second_stage1 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                           population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik_align,
                         data = df_model)
 summary(second_stage1)
 
 second_stage2 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                           population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik2,
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik_orth,
                         data = df_model)
 summary(second_stage2)
-
-second_stage3 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik3,
-                        data = df_model)
-summary(second_stage3)
-
-second_stage4 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik4,
-                        data = df_model)
-summary(second_stage4)
-
-# Combine second-stage models into a list
-second_stage_models_change <- list(
-  "t-1" = second_stage1,
-  "t-2" = second_stage2,
-  "t-3" = second_stage3,
-  "t-4" = second_stage4
-)
-# Create a summary table for second-stage models
-modelsummary(
-  second_stage_models_change,
-  output = "latex",
-  title = "Second Stage Estimates – Change in Area",
-  coef_map = c(
-    "fit_garimpo_ha_change" = "Change in Garimpo Area"
-  ),
-  statistic = c("({std.error})", "p.value"),
-  stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
-  escape = FALSE
-)
 
 second_stage_models_ols <- list(
   "OLS" = ols_model,
