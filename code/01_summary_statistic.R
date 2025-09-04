@@ -145,6 +145,17 @@ mining_A_all <- mining2_all |>
     legal_amazon = ifelse(muni_id %in% legal_amazon_munis, 1, 0)
   )
 
+## number of municipalitys
+
+mining_A_all |> 
+  group_by(legal_amazon) |> 
+  summarise(
+    n_munis = n_distinct(muni_id),
+    n_years = n_distinct(year)
+  )
+
+
+
 ## percentage of artisanl mining in legal amazon vs rest of Brasil
 
 mining_A_all1 <- mining_A_all |> 
@@ -177,6 +188,7 @@ mining2_AI <- mining1 |>
   )) |> 
   mutate(substance = factor(substance, levels = c("artisanal", "industrial", "other"))) |> 
   filter(muni_id %in% legal_amazon_munis)
+
 
 ## percentage of area_ha by substance
 
