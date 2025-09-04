@@ -514,6 +514,19 @@ crs_web <- 3857
 amazon_muni_proj <- st_transform(amazon_muni, crs_web)
 garimpo_all_proj <- st_transform(garimpo_all, crs_web)
 
+## para boarder
+
+library(rnaturalearth)
+
+# Download Brazil states
+states <- ne_states(country = "brazil", returnclass = "sf")
+
+# Filter for Pará
+para <- states %>% filter(name == "Pará")
+
+# Or just Brazil border
+brazil <- ne_countries(country = "brazil", returnclass = "sf")
+
 # 2. Prepare background map layer
 bg_map <- annotation_map_tile(type = "osm", zoom = 6)  # Try "osm", "cartolight", "cartodark", etc.
 
@@ -523,6 +536,7 @@ p1 <- ggplot() +
   geom_sf(data = amazon_muni_proj, fill = "white", color = "black", linewidth = 0.1, alpha = 0.5) +
   geom_sf(data = filter(garimpo_all_proj, year == 2002), 
           aes(fill = area_cat), color = "black", size = 0.1) +
+  geom_sf(data = para, fill = NA, color = "red", linewidth = 0.8) +
   scale_fill_viridis_d(
     name = "Garimpo Area (ha)",
     option = "D", 
@@ -548,6 +562,7 @@ p2 <- ggplot() +
   geom_sf(data = amazon_muni_proj, fill = "white", color = "black", linewidth = 0.1, alpha = 0.5) +
   geom_sf(data = filter(garimpo_all_proj, year == 2022), 
           aes(fill = area_cat), color = "black", size = 0.1) +
+  geom_sf(data = para, fill = NA, color = "red", linewidth = 0.8) +
   scale_fill_viridis_d(
     name = "Garimpo Area (ha)",
     option = "D",
@@ -597,8 +612,9 @@ final_plot <- ggdraw() +
     size = 10, fontface = "italic"
   )
 
+
 final_plot
 
 # Save the final plot
 
-ggsave("figures/garimpo_area_2002_2022.png", final_plot, width = 12, height = 6, dpi = 300)
+ggsave("figures/garimpo_area_2002_2022p.png", final_plot, width = 12, height = 6, dpi = 300)
