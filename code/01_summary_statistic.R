@@ -362,20 +362,24 @@ mining_art <- mining_art |>
 ## plot
 
 mining_art |> 
+  mutate(substance = fct_relevel(substance, 
+                                 "Gold", "Tin", "Non-metallic", "Precious stones", "Other")) |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
-  geom_area(size = 1) +
-  scale_fill_viridis_d(option = "D", direction = 1, name = "Substance") +
+  geom_area(size = 1 ) +
+  scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
   ## change scale y to make it readable withouth e
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_x_continuous(breaks = seq(1985, 2023, 5)) +
+  scale_y_continuous(labels = (function(x) format(x, scientific = FALSE))) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
-    title = "Proportional area of artisanal mining in Brazil",
-    subtitle = "1985-2023",
+    title = "Artisanal mining area in Brazil by substance",
+    subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
     fill = "Substance"
   ) +
   theme_minimal()
+
+ggsave()
 
 mining_art <- mining_art |>
   mutate(
