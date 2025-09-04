@@ -12,6 +12,7 @@ df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx",
                      skip = 5, 
                      col_names = FALSE)
 
+
 colnames(df_raw) <- paste(df_raw[1, ], df_raw[2, ], sep = "\n")
 
 # Remove the first two rows from the data
@@ -379,7 +380,7 @@ mining_art |>
   ) +
   theme_minimal()
 
-ggsave()
+ggsave("figures/artisanal_mining_timeseries.png", width = 10, height = 6, dpi = 300)
 
 mining_art <- mining_art |>
   mutate(
@@ -408,20 +409,24 @@ mining_ind <- mining1 |>
 
 
 mining_ind |> 
+  mutate(substance = fct_relevel(substance, 
+                                 "Gold", "Tin", "Non-metallic", "Non-identified", "Other")) |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
   geom_area(size = 1) +
-  scale_fill_viridis_d(option = "D", direction = 1, name = "Substance") +
+  scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
   ## change scale y to make it readable withouth e
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
-  scale_x_continuous(breaks = seq(1985, 2023, 5)) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
-    title = "Proportional area of industrial mining in Brazil",
-    subtitle = "1985-2023",
+    title = "Industrial mining area in Brazil by substance",
+    subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
     fill = "Substance"
   ) +
   theme_minimal()
+
+ggsave("figures/industrial_mining_timeseries.png", width = 10, height = 6, dpi = 300)
 
 ## explore mining_ind
 
