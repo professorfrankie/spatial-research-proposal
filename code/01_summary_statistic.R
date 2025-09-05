@@ -366,7 +366,7 @@ mining_art |>
   mutate(substance = fct_relevel(substance, 
                                  "Gold", "Tin", "Non-metallic", "Precious stones", "Other")) |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
-  geom_area(size = 1 ) +
+  geom_area(size = 1, color = "black" ) +
   scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
   scale_y_continuous(
     labels = scales::label_comma(),
@@ -418,7 +418,7 @@ mining_ind |>
   mutate(substance = fct_relevel(substance, 
                                  "Gold", "Tin", "Non-metallic", "Non-identified", "Other")) |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
-  geom_area(size = 1) +
+  geom_area(size = 1, color = "black") +
   scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
   ## change scale y to make it readable withouth e
   scale_y_continuous(
