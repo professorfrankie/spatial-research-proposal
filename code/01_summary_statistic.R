@@ -368,8 +368,10 @@ mining_art |>
   ggplot(aes(x = year, y = area_ha, fill = substance)) +
   geom_area(size = 1 ) +
   scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
-  ## change scale y to make it readable withouth e
-  scale_y_continuous(labels = (function(x) format(x, scientific = FALSE))) +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
     title = "Artisanal mining area in Brazil by substance",
@@ -378,9 +380,13 @@ mining_art |>
     y = "Area (ha)",
     fill = "Substance"
   ) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  ) +
   theme_minimal()
 
-ggsave("figures/artisanal_mining_timeseries.png", width = 10, height = 6, dpi = 300)
+ggsave("figures/artisanal_mining_timeseries.png", width = 10, height = 6, dpi = 300, bg = "white")
 
 mining_art <- mining_art |>
   mutate(
@@ -415,7 +421,10 @@ mining_ind |>
   geom_area(size = 1) +
   scale_fill_viridis_d(option = "D", direction = -1, name = "Substance") +
   ## change scale y to make it readable withouth e
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE)) +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
     title = "Industrial mining area in Brazil by substance",
@@ -424,9 +433,11 @@ mining_ind |>
     y = "Area (ha)",
     fill = "Substance"
   ) +
+  theme(    plot.background = element_rect(fill = "white", color = NA),
+            panel.background = element_rect(fill = "white", color = NA)) +
   theme_minimal()
 
-ggsave("figures/industrial_mining_timeseries.png", width = 10, height = 6, dpi = 300)
+ggsave("figures/industrial_mining_timeseries.png", width = 10, height = 6, dpi = 300, bg = "white")
 
 ## explore mining_ind
 
