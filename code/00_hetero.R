@@ -543,7 +543,10 @@ etable(
     "fit_bolsonaro"                    = "Bolsonaro",
     "forest_loss_all_gross"       = "Forest Loss"
   ),
-  keep    = c("%fit_garimpo_ha_change"),
+  keep    = c("%fit_garimpo_ha_change", "%fit_lula:garimpo_ha_change", "%fit_lula",
+              "%fit_rousseff:garimpo_ha_change", "%fit_rousseff",
+              "%fit_temer:garimpo_ha_change", "%fit_temer",
+              "%fit_bolsonaro:garimpo_ha_change", "%fit_bolsonaro"),
   headers = c("Lula", "Rousseff", "Temer", "Bolsonaro"),
   fitstat = ~ n + r2 + ar2 + f + ivf,
   tex     = TRUE,
