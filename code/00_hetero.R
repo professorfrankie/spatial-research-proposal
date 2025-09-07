@@ -8,7 +8,7 @@ library(fixest)
 library(modelsummary)
 
 
-df <- read_csv("C:\\Users\\Utente\\Documents\\GitHub\\spatial-research-proposal\\processed_data\\df_amazon_newpca.csv") |> 
+df <- read_csv("processed_data/df_amazon_newpca.csv") |> 
   select(-c(...1, forest, gdp_pc, population, pop_dens, pa_tot_ha, n_fined, brl_fined)) |> 
   filter(between(year, 2002, 2022))
 
@@ -147,6 +147,43 @@ etable(
 )
 
 
+#full sample of para with interaction terms
+
+stage3_para <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                       population_change + pop_dens_change + pa_tot_ha_change + 
+                       n_fined_change + brl_fined_change |
+                       year | 
+                       para*garimpo_ha_change ~ para*bartik3,
+                     data = df_model)
+
+stage4_para <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                       population_change + pop_dens_change + pa_tot_ha_change + 
+                       n_fined_change + brl_fined_change |
+                       year | 
+                       para*garimpo_ha_change ~ para*bartik4,
+                     data = df_model)
+
+etable(
+  list(
+    "Lag 3 – Para" = stage3_para, 
+    "Lag 4 – Para" = stage4_para
+  ),
+  dict = c(
+    "fit_garimpo_ha_change"       = "Change in Garimpo Area",
+    "fit_para:garimpo_ha_change"  = "Change in Garimpo Area x Para",
+    "fit_para"                    = "Para",
+    "forest_loss_all_gross"       = "Forest Loss"
+  ),
+  keep    = c("%fit_garimpo_ha_change", "%fit_para:garimpo_ha_change", "%fit_para"),
+  headers = c("Lag 3 – Para", "Lag 4 – Para"),
+  fitstat = ~ n + r2 + ar2 + f + ivf,
+  tex     = TRUE,
+  title   = "IV Estimates – Para vs Non-Para (Lag 3 vs Lag 4)",
+  extralines = list(
+    "Covariates" = c("Full", "Full")
+  )
+)
+
 
 ####################################
 
@@ -228,6 +265,42 @@ etable(
     "Covariates" = c("Full", "Full", "Full", "Full")
   )
 )
+
+
+# full sample 
+
+stage3_good <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                        population_change + pop_dens_change + pa_tot_ha_change + 
+                        n_fined_change + brl_fined_change |
+                        year | 
+                        good*garimpo_ha_change ~ good*bartik3,
+                      data = df_model)
+stage4_good <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                        population_change + pop_dens_change + pa_tot_ha_change + 
+                        n_fined_change + brl_fined_change |
+                        year | 
+                        good*garimpo_ha_change ~ good*bartik4,
+                      data = df_model)
+
+etable(
+  list(
+    "Lag 3 – Good"     = stage3_good, 
+    "Lag 4 – Good"     = stage4_good
+  ),
+  dict = c(
+    fit_garimpo_ha_change = "Change in Garimpo Area",
+    forest_loss_all_gross = "Forest Loss"
+  ),
+  keep    = c("%fit_garimpo_ha_change"),
+  headers = c("Lag 3 – Good", "Lag 4 – Good"),
+  fitstat = ~ n + r2 + ar2 + f + ivf,
+  tex     = TRUE,
+  title   = "IV Estimates – Good vs Bad (Lag 3 vs Lag 4)",
+  extralines = list(
+    "Covariates" = c("Full", "Full")
+  )
+)
+
 
 ####### OLS #########
 ols_model <- feols(forest_loss_all_gross ~ garimpo_ha_change+ spei_dry + gdp_pc_change + 
@@ -395,7 +468,7 @@ stage3_rousseff <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change +
                            rousseff*garimpo_ha_change ~ rousseff*bartik3,
                          data = df_pres)
 
-summary(stage4_rousseff)
+summary(stage3_rousseff)
 
 stage3_rousseffs <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                             population_change + pop_dens_change + pa_tot_ha_change + 
@@ -459,8 +532,16 @@ etable(
     "Bolsonaro" = stage3_bolsonaro
   ),
   dict = c(
-    fit_garimpo_ha_change = "Change in Garimpo Area",
-    forest_loss_all_gross = "Forest Loss"
+    "fit_garimpo_ha_change"       = "Change in Garimpo Area",
+    "fit_lula:garimpo_ha_change"  = "Change in Garimpo Area x Lula",
+    "fit_lula"                    = "Lula",
+    "fit_rousseff:garimpo_ha_change"  = "Change in Garimpo Area x Rousseff",
+    "fit_rousseff"                    = "Rousseff",
+    "fit_temer:garimpo_ha_change"  = "Change in Garimpo Area x Temer",
+    "fit_temer"                    = "Temer",
+    "fit_bolsonaro:garimpo_ha_change"  = "Change in Garimpo Area x Bolsonaro",
+    "fit_bolsonaro"                    = "Bolsonaro",
+    "forest_loss_all_gross"       = "Forest Loss"
   ),
   keep    = c("%fit_garimpo_ha_change"),
   headers = c("Lula", "Rousseff", "Temer", "Bolsonaro"),
@@ -663,191 +744,3 @@ modelsummary(
   gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
   escape = FALSE
 )
-
-# second stage with multiple bartiks
-
-second_stage1B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
-                        data = df_model)
-summary(second_stage1B)
-
-second_stage2B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2,
-                        data = df_model)
-summary(second_stage2B)
-
-second_stage3B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2 + bartik3,
-                        data = df_model)
-summary(second_stage3B)
-
-second_stage4B <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2 + bartik3 + bartik4,
-                        data = df_model)
-summary(second_stage4B)
-
-# Combine second-stage models into a list
-second_stage_models_changeB <- list(
-  "t-1" = second_stage1B,
-  "t-2" = second_stage2B,
-  "t-3" = second_stage3B,
-  "t-4" = second_stage4B
-)
-
-# Create a summary table for second-stage models
-modelsummary(
-  second_stage_models_changeB,
-  output = "latex",
-  title = "Second Stage Estimates – Change in Area",
-  coef_map = c(
-    "fit_garimpo_ha_change" = "Change in Garimpo Area"
-  ),
-  statistic = c("({std.error})", "p.value"),
-  stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
-  escape = FALSE
-)
-
-summary(second_stage1B, stage = 1)
-summary(second_stage2B, stage = 1)
-summary(second_stage3B, stage = 1)
-summary(second_stage4B, stage = 1)
-
-fist_stage_models_changeB <- list(
-  "Model 1" = summary(second_stage1B, stage = 1),
-  "Model 2" = summary(second_stage2B, stage = 1),
-  "Model 3" = summary(second_stage3B, stage = 1),
-  "Model 4" = summary(second_stage4B, stage = 1)
-)
-
-modelsummary(
-  fist_stage_models_changeB,
-  output = "latex",
-  title = "Second Stage Estimates – Change in Area",
-  coef_map = c(
-    "bartik" = "Bartik t-1",
-    "bartik2" = "Bartik t-2",
-    "bartik3" = "Bartik t-3",  
-    "bartik4" = "Bartik t-4"
-  ),
-  statistic = c("({std.error})", "p.value"),
-  stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
-  escape = FALSE
-)
-
-
-
-
-second_stage5 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                         population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
-                       data = df_model)
-summary(second_stage5)
-
-second_stage6 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                         population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik2,
-                       data = df_model)
-summary(second_stage6)
-
-second_stage7 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                         population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik3,
-                       data = df_model)
-summary(second_stage7)
-
-second_stage8 <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                         population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik4,
-                       data = df_model)
-summary(second_stage8)
-
-# Combine second-stage models into a list
-second_stage_forest_change <- list(
-  "t-1" = second_stage5,
-  "t-2" = second_stage6,
-  "t-3" = second_stage7,
-  "t-4" = second_stage8
-)
-# Create a summary table for second-stage models
-modelsummary(
-  second_stage_forest_change,
-  output = "latex",
-  title = "Second Stage Estimates – Change in Area",
-  coef_map = c(
-    "fit_garimpo_ha_change" = "Change in Garimpo Area"
-  ),
-  statistic = c("({std.error})", "p.value"),
-  stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
-  escape = FALSE
-)
-
-summary(second_stage5, stage = 1)
-summary(second_stage6, stage = 1)
-summary(second_stage7, stage = 1)
-summary(second_stage8, stage = 1)
-
-# second stage with multiple bartiks
-
-second_stage5B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik,
-                        data = df_model)
-summary(second_stage5B)
-
-second_stage6B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2,
-                        data = df_model)
-summary(second_stage6B)
-
-second_stage7B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2 + bartik3,
-                        data = df_model)
-summary(second_stage7B)
-
-second_stage8B <- feols(forest_change ~ spei_dry + gdp_pc_change + 
-                          population_change + pop_dens_change + pa_tot_ha_change + 
-                          n_fined_change + brl_fined_change | year | 
-                          garimpo_ha_change ~ bartik + bartik2 + bartik3 + bartik4,
-                        data = df_model)
-summary(second_stage8B)
-
-# Combine second-stage models into a list
-second_stage_forest_changeB <- list(
-  "t-1" = second_stage5B,
-  "t-2" = second_stage6B,
-  "t-3" = second_stage7B,
-  "t-4" = second_stage8B
-)
-
-# Create a summary table for second-stage models
-modelsummary(
-  second_stage_models_change,
-  output = "latex",
-  title = "Second Stage Estimates – Change in Area",
-  coef_map = c(
-    "fit_garimpo_ha_change" = "Change in Garimpo Area"
-  ),
-  statistic = c("({std.error})", "p.value"),
-  stars = TRUE,
-  gof_omit = "AIC|BIC|Log.Lik|Deviance|RMSE",
-  escape = FALSE
-)
-
-summary(second_stage5B, stage = 1)
-summary(second_stage6B, stage = 1)
-summary(second_stage7B, stage = 1)
-summary(second_stage8B, stage = 1)
