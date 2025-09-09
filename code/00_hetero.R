@@ -579,6 +579,38 @@ etable(
   )
 )
 
+## STAGE 4 ##
+
+stage4_luls <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                       population_change + pop_dens_change + pa_tot_ha_change + 
+                       n_fined_change + brl_fined_change |
+                       year | 
+                       garimpo_ha_change ~ bartik4,
+                     data = lula)
+
+stage4_rousseffs <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                            population_change + pop_dens_change + pa_tot_ha_change + 
+                            n_fined_change + brl_fined_change | 
+                            year | 
+                            garimpo_ha_change ~ bartik4,
+                          data = rousseff)
+
+stage4_temers <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change +
+                         population_change + pop_dens_change + pa_tot_ha_change + 
+                         n_fined_change + brl_fined_change | 
+                         year | 
+                         garimpo_ha_change ~ bartik4,
+                       data = temer)
+
+stage4_bolsonaros <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                              population_change + pop_dens_change + pa_tot_ha_change + 
+                              n_fined_change + brl_fined_change | 
+                              year | 
+                              garimpo_ha_change ~ bartik4,
+                            data = bolsonaro)
+                         
+
+
 ###### IV SPECIFICATION #########
 ###### SECOND STAGE #########
 
