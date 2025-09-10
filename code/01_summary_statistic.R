@@ -5,6 +5,8 @@ library(tidyverse)
 library(readxl)
 library(ggstream)
 library(datazoom.amazonia)
+library(ggplot2)
+library(viridis)
 mining <- read_csv("raw_data/mining_munis.csv", quote = "")
 
 df_raw <- read_excel("raw_data/CMO-Historical-Data-Annual.xlsx", 
@@ -155,13 +157,44 @@ mining_A_all |>
     n_years = n_distinct(year)
   )
 
-## create a time series showing how the area of artisanal mining has changed over time in Brazil
+mining_A_all$legal_amazon <- factor(
+  mining_A_all$legal_amazon,
+  levels = c(0, 1),
+  labels = c("No", "Yes")
+)
 
 mining_A_all |> 
-  ggplot(aes(x = year, y = area_ha, color = as.factor(legal_amazon))) +
-  geom_line(stat = "summary", fun = "sum", size = 1)
-  
+  ggplot(aes(x = year, y = area_ha, fill = legal_amazon)) +
+  #stacked bar
+  geom_col(
+    position = "stack",
+    alpha = 0.9,
+    size = 0.2
+    
+  ) +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
+  scale_fill_manual(
+    name   = "Legal Amazon",
+    labels = c("No", "Yes"),
+    values = c("No" = "steelblue", "Yes" = "forestgreen")
+  ) +
+  labs(
+    title = "Artisanal Mining in Brazil’s Legal Amazon vs. Other Regions (2002–2022)",
+    x = "Year",
+    y = "Area (ha)",
+    caption = "Data: MapBiomas"
+  ) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  ) +
+  theme_minimal()
 
+ggsave("figures/mining_timeseries_legal_amazon.png", width = 10, height = 6, dpi = 300, bg = "white")
 
 
 ## percentage of artisanl mining in legal amazon vs rest of Brasil
@@ -250,7 +283,7 @@ mining_sum |>
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   scale_fill_manual(values = pal, name = "Mining Type") +
   labs(
-    title = "Mining area in Brazil",
+    title = "Artisanal and Industrial Mining Footprints in the Legal Amazon",
     subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
@@ -380,7 +413,7 @@ main <-
   ) +
   scale_x_continuous(breaks = seq(2002, 2022)) +
   labs(
-    title = "Brazil’s Artisanal Gold Extraction Through the Years",
+    title = "Artisanal and Industrial Gold Mining in the Brazilian Legal Amazon with Gold Prices",
     subtitle = "2002–2022",
     x = "Year",
     fill = "Mining Type",
