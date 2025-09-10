@@ -609,6 +609,28 @@ stage4_bolsonaros <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change +
                               garimpo_ha_change ~ bartik4,
                             data = bolsonaro)
                          
+## create etable for stage 4
+
+etable(
+  list(
+    "Lula"      = stage4_luls, 
+    "Rousseff"  = stage4_rousseffs,
+    "Temer"     = stage4_temers, 
+    "Bolsonaro" = stage4_bolsonaros
+  ),
+  dict = c(
+    fit_garimpo_ha_change = "Change in Garimpo Area",
+    forest_loss_all_gross = "Forest Loss"
+  ),
+  keep    = c("%fit_garimpo_ha_change"),
+  headers = c("Lula", "Rousseff", "Temer", "Bolsonaro"),
+  fitstat = ~ n + r2 + ar2 + f + ivf,
+  tex     = TRUE,
+  title   = "IV Estimates – By President (Lag 4)",
+  extralines = list(
+    "Covariates" = c("Full", "Full", "Full", "Full")
+  )
+)
 
 
 ###### IV SPECIFICATION #########
