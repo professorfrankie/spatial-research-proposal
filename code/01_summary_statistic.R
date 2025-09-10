@@ -155,6 +155,13 @@ mining_A_all |>
     n_years = n_distinct(year)
   )
 
+## create a time series showing how the area of artisanal mining has changed over time in Brazil
+
+mining_A_all |> 
+  ggplot(aes(x = year, y = area_ha, color = as.factor(legal_amazon))) +
+  geom_line(stat = "summary", fun = "sum", size = 1)
+  
+
 
 
 ## percentage of artisanl mining in legal amazon vs rest of Brasil
@@ -232,6 +239,30 @@ mining_sum <- mining2_AI |>
   group_by(year, substance) |> 
   summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |> 
   mutate(substance = factor(substance, levels = c("artisanal", "industrial", "other")))
+
+mining_art <- mining_sum |> 
+  filter(substance %in% "artisanal")
+
+mining_art |> 
+  ggplot(aes(x = year, y = area_ha)) +
+  geom_bar(stat = "identity", fill = "gold") +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
+  labs(
+    title = "Artisanal mining area in Brazil",
+    subtitle = "2002-2022",
+    x = "Year",
+    y = "Area (ha)"
+  ) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  ) +
+  theme_minimal()
+
 
 ## explore the cumulative 
 
