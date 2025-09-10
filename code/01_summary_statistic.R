@@ -338,12 +338,15 @@ real_prices <- real_prices %>%
          Tin_scaled = scales::rescale(Tin, to = mining_total_range))
 
 # Final plot
-main <- ggplot() +
+art_gold <- mining2_AI |> filter(mining_id == "215")
+   
+main <- 
+  ggplot() +
   # Stacked mining bars
   geom_col(
-    data = mining_sum,
     aes(x = year, y = area_ha, fill = substance),
-    position = "stack"
+    position = "stack",
+    data = art_gold
   ) +
   # Gold price line with color aesthetic mapped
   geom_line(
@@ -377,7 +380,7 @@ main <- ggplot() +
   ) +
   scale_x_continuous(breaks = seq(2002, 2022)) +
   labs(
-    title = "Brazil’s Mining Landscape Through the Years",
+    title = "Brazil’s Artisanal Gold Extraction Through the Years",
     subtitle = "2002–2022",
     x = "Year",
     fill = "Mining Type",
