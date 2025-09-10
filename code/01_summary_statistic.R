@@ -231,7 +231,7 @@ mining2_AI |>
 mining2_AI$substance 
 
 pal=c("#fde725",
-      "#440154")
+      "navyblue")
 
 ## timeseries with mining id and area
 
@@ -239,6 +239,30 @@ mining_sum <- mining2_AI |>
   group_by(year, substance) |> 
   summarise(area_ha = sum(area_ha, na.rm = TRUE), .groups = "drop") |> 
   mutate(substance = factor(substance, levels = c("artisanal", "industrial", "other")))
+
+mining_sum |> 
+  ggplot(aes(x = year, y = area_ha, fill = substance)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
+  scale_fill_manual(values = pal, name = "Mining Type") +
+  labs(
+    title = "Mining area in Brazil",
+    subtitle = "2002-2022",
+    x = "Year",
+    y = "Area (ha)",
+    caption = "Data: MapBiomas"
+  ) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  ) +
+  theme_minimal()
+
+ggsave("figures/mining_timeseries_both.png", width = 10, height = 6, dpi = 300, bg = "white")
 
 mining_art <- mining_sum |> 
   filter(substance %in% "artisanal")
@@ -253,6 +277,29 @@ mining_art |>
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
     title = "Artisanal mining area in Brazil",
+    subtitle = "2002-2022",
+    x = "Year",
+    y = "Area (ha)"
+  ) +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA)
+  ) +
+  theme_minimal()
+
+mining_ind <- mining_sum |> 
+  filter(substance %in% "industrial")
+
+mining_ind |>
+  ggplot(aes(x = year, y = area_ha)) +
+  geom_bar(stat = "identity", fill = "navyblue") +
+  scale_y_continuous(
+    labels = scales::label_comma(),
+    breaks = scales::pretty_breaks(n = 7)   # adjust n to control tick density
+  ) +
+  scale_x_continuous(breaks = seq(2002, 2022, 1)) +
+  labs(
+    title = "Industrial mining area in Brazil",
     subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)"
