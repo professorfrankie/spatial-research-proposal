@@ -122,6 +122,16 @@ df_bartik_final <- df_bartik |>
   )
 
 #####################################################
+# lag 3 and 4 iron and thin
+df_bartik_final <- df_bartik |> 
+  mutate(
+    bartik3i = shift_iron3 * share_zi0,
+    bartik4i = shift_iron4 * share_zi0,
+    bartik3t = shift_tin3 * share_zi0,
+    bartik4t = shift_tin4 * share_zi0
+  )
+
+
 
 ## REGRESSION: Reduced form
 # Join temporarily
@@ -210,7 +220,7 @@ etable(
   ),
   keep    = c("%garimpo_ha_change", "%fit_garimpo_ha_change"),
   headers = c("OLS", "t-3", "t-4"),
-  fitstat = ~ n + r2 + ar2 + f + ivf,
+  fitstat = ~ n + r2 + ar2 + ivf,
   tex     = TRUE,
   title   = "Second Stage Estimates – Change in Area",
   extralines = list(
@@ -466,3 +476,51 @@ summary(second_stage5B, stage = 1)
 summary(second_stage6B, stage = 1)
 summary(second_stage7B, stage = 1)
 summary(second_stage8B, stage = 1)
+
+#####################################
+second_stage3i <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik3i,
+                        data = df_model)
+summary(second_stage3i)
+
+second_stage4i <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik4i,
+                        data = df_model)
+summary(second_stage4i)
+
+second_stage3t <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik3t,
+                        data = df_model)
+summary(second_stage3t)
+
+second_stage4t <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
+                          population_change + pop_dens_change + pa_tot_ha_change + 
+                          n_fined_change + brl_fined_change | year | garimpo_ha_change ~ bartik4t,
+                        data = df_model)
+summary(second_stage4t)
+
+# Combine second-stage models into a list
+# Combine second-stage models into a list
+etable(
+  list(
+    "Lag 3 – Iron"     = second_stage3i, 
+    "Lag 3 – Tin" = second_stage3t,
+    "Lag 4 – Iron"     = second_stage4i, 
+    "Lag 4 – Tin" = second_stage4t
+  ),
+  dict = c(
+    fit_garimpo_ha_change = "Change in Garimpo Area",
+    forest_loss_all_gross = "Forest Loss"
+  ),
+  keep    = c("%fit_garimpo_ha_change"),
+  headers = c("Lag 3 – Iron", "Lag 3 – Tin", "Lag 4 – Iron", "Lag 4 – Tin"),
+  fitstat = ~ n + r2 + ar2 + ivf,
+  tex     = TRUE,
+  title   = "IV Estimates – Iron vs Tin (Lag 3 vs Lag 4)",
+  extralines = list(
+    "Covariates" = c("Full", "Full", "Full", "Full")
+  )
+)
