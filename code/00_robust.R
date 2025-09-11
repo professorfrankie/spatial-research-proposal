@@ -96,7 +96,7 @@ etable(
     fit_garimpo_ha_change = "Change in Garimpo Area",
     forest_loss_all_gross = "Forest Loss"
   ),
-  keep    = c("garimpo_ha_change", "%fit_garimpo_ha_change", "%forest_loss_all_gross"),
+  keep    = c("%garimpo_ha_change", "%fit_garimpo_ha_change", "%forest_loss_all_gross"),
   headers = c("OLS No Controls", "IV Lag 1 No Controls", "IV Lag 2 No Controls", "IV Lag 3 No Controls", "IV Lag 4 No Controls"),
   fitstat = ~ n + r2 + ar2 + ivf,
   tex    = TRUE,
@@ -124,24 +124,24 @@ summary(second_stage1)
 
 second_stage2 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                          population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik2
+                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik2,
                        data = df_model)
 summary(second_stage2)
 
 second_stage3 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                          population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik3
+                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik3,
                        data = df_model)
 summary(second_stage3)
 
 second_stage4 <- feols(forest_loss_all_gross ~ spei_dry + gdp_pc_change + 
                          population_change + pop_dens_change + pa_tot_ha_change + 
-                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik4
+                         n_fined_change + brl_fined_change | year | lag_garimpo_ha_change ~ bartik4,
                        data = df_model)
 summary(second_stage4)
 
 second_stage_models_ols <- list(
-  "OLS" = ols_model,
+  "OLS" = ols_model_lag,
   "t-1" = second_stage1,
   "t-2" = second_stage2,
   "t-3" = second_stage3,
@@ -151,16 +151,16 @@ second_stage_models_ols <- list(
 etable(
   second_stage_models_ols,
   dict = c(
-    garimpo_ha_change     = "Change in Garimpo Area",
-    fit_garimpo_ha_change = "Change in Garimpo Area",
+    lag_garimpo_ha_change     = "Lag Change in Garimpo Area",
+    fit_lag_garimpo_ha_change = "Lag Change in Garimpo Area",
     forest_loss_all_gross = "Forest Loss"
   ),
-  keep    = c("%garimpo_ha_change", "%fit_garimpo_ha_change"),
+  keep    = c("%lag_garimpo_ha_change", "%fit_lag_garimpo_ha_change"),
   headers = c("OLS", "t-1", "t-2", "t-3", "t-4"),
-  fitstat = ~ n + r2 + ar2 + f + ivf,
+  fitstat = ~ n + r2 + ar2 + ivf,
   tex     = TRUE,
   title   = "Second Stage Estimates – Change in Area",
   extralines = list(
-    "Covariates" = c("Full", "Full", "Full")
+    "Covariates" = c("Full", "Full", "Full", "Full", "Full")
   )
 )
