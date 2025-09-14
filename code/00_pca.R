@@ -100,3 +100,40 @@ write.csv(
 # Barplot of |Gold| loadings across PCs
 # barplot(abs(gold_loadings), las = 2, ylab = "|loading|", main = "Gold loading across PCs")
 
+# --- Precious metals PCA (Gold + Silver + Platinum) ---------------------------
+precious_df <- df %>%
+  select(`Platinum\n($/troy oz)`,
+         `Gold\n($/troy oz)`,
+         `Silver\n($/troy oz)`)
+
+precious_pca <- prcomp(scale(precious_df), center = FALSE, scale. = FALSE)
+precious_shock <- precious_pca$x[, 1]  # first PC
+
+# --- Non-precious metals PCA (excluding Gold) --------------------------------
+nonprecious_df <- df %>%
+  select(`Zinc\n($/mt)`,
+         `Nickel\n($/mt)`,
+         `Tin\n($/mt)`,
+         `Copper\n($/mt)`,
+         `Lead\n($/mt)`,
+         `Iron ore, cfr spot\n($/dmtu)`,
+         `Phosphate rock\n($/mt)`)
+
+nonprecious_pca <- prcomp(scale(nonprecious_df), center = FALSE, scale. = FALSE)
+nonprecious_shock <- nonprecious_pca$x[, 1]  # first PC
+
+# --- Combine into shock series ------------------------------------------------
+df_shocks_grouped <- df %>%
+  transmute(
+    year,
+    precious_shock    = precious_shock,
+    nonprecious_shock = nonprecious_shock
+  )
+
+print(head(df_shocks_grouped, 10))
+
+write.csv(
+  df_shocks_grouped,
+  "processed_data/pca_grouped_shocks.csv",
+  row.names = FALSE
+)
