@@ -180,10 +180,10 @@ mining_A_all |>
   scale_fill_manual(
     name   = "Legal Amazon",
     labels = c("No", "Yes"),
-    values = c("No" = "steelblue", "Yes" = "forestgreen")
+    values = c("No" = "red3", "Yes" = "forestgreen")
   ) +
   labs(
-    title = "Artisanal Mining in Brazil’s Legal Amazon vs. Other Regions (2002–2022)",
+    #title = "Artisanal Mining in Brazil’s Legal Amazon vs. Other Regions (2002–2022)",
     x = "Year",
     y = "Area (ha)",
     caption = "Data: MapBiomas"
@@ -413,8 +413,8 @@ main <-
   ) +
   scale_x_continuous(breaks = seq(2002, 2022)) +
   labs(
-    title = "Artisanal and Industrial Gold Mining in the Brazilian Legal Amazon with Gold Prices",
-    subtitle = "2002–2022",
+    #title = "Artisanal and Industrial Gold Mining in the Brazilian Legal Amazon with Gold Prices",
+    #subtitle = "2002–2022",
     x = "Year",
     fill = "Mining Type",
     caption = "Data: MapBiomas, World Bank",
@@ -488,8 +488,8 @@ mining_art |>
   ) +
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
-    title = "Artisanal mining area in Brazil by substance",
-    subtitle = "2002-2022",
+    #title = "Artisanal mining area in Brazil by substance",
+    #subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
     fill = "Substance"
@@ -541,8 +541,8 @@ mining_ind |>
   ) +
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   labs(
-    title = "Industrial mining area in Brazil by substance",
-    subtitle = "2002-2022",
+    #title = "Industrial mining area in Brazil by substance",
+    #subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
     fill = "Substance"
