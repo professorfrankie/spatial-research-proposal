@@ -34,7 +34,7 @@ df <- df_raw[-c(1, 2), ] %>%
     year = as.integer(as.character(year)),
     across(-year, ~ as.numeric(.))
   ) %>%
-  filter(year >= 2002, year <= 2022)
+  filter(year >= 1998, year <= 2022)
 
 # --- 2) Standardize the predictors (not the year) -----------------------------
 X_std <- df %>%
@@ -86,7 +86,17 @@ df_shocks <- df %>%
     year,
     gold_aligned_shock    = gold_aligned_shock,
     gold_orthogonal_shock = gold_orthogonal_shock
-  )
+  ) %>%
+  mutate(gold_aligned1 = lag(gold_aligned_shock, n=1),
+         gold_orthogonal1 = lag(gold_orthogonal_shock, n=1),
+         gold_aligned2 = lag(gold_aligned_shock, n=2),
+         gold_orthogonal2 = lag(gold_orthogonal_shock, n=2),
+         gold_aligned3 = lag(gold_aligned_shock, n=3),
+         gold_orthogonal3 = lag(gold_orthogonal_shock, n=3),
+         gold_aligned4 = lag(gold_aligned_shock, n=4),
+         gold_orthogonal4 = lag(gold_orthogonal_shock, n=4)) %>%
+  filter(year >= 2002, year <= 2022)
+  
 
 print(head(df_shocks, 10))
 
@@ -128,7 +138,16 @@ df_shocks_grouped <- df %>%
     year,
     precious_shock    = precious_shock,
     nonprecious_shock = nonprecious_shock
-  )
+  ) %>%
+  mutate(precious1 = lag(precious_shock, n=1),
+         nonprecious1 = lag(nonprecious_shock, n=1),
+         precious2 = lag(precious_shock, n=2),
+         nonprecious2 = lag(nonprecious_shock, n=2),
+         precious3 = lag(precious_shock, n=3),
+         nonprecious3 = lag(nonprecious_shock, n=3),
+         precious4 = lag(precious_shock, n=4),
+         nonprecious4 = lag(nonprecious_shock, n=4)) %>%
+  filter(year >= 2002, year <= 2022)
 
 print(head(df_shocks_grouped, 10))
 
