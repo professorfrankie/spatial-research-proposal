@@ -180,7 +180,7 @@ mining_A_all |>
   scale_fill_manual(
     name   = "Legal Amazon",
     labels = c("No", "Yes"),
-    values = c("No" = "red3", "Yes" = "forestgreen")
+    values = c("No" = "#FF8C00", "Yes" = "forestgreen")
   ) +
   labs(
     #title = "Artisanal Mining in Brazil’s Legal Amazon vs. Other Regions (2002–2022)",
@@ -283,7 +283,7 @@ mining_sum |>
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   scale_fill_manual(values = pal, name = "Mining Type") +
   labs(
-    title = "Artisanal and Industrial Mining Footprints in the Legal Amazon",
+    title = "Artisanal and Industrial Mining in the Brazilian Legal Amazon",
     subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
