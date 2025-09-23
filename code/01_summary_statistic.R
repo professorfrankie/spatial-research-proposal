@@ -283,8 +283,8 @@ mining_sum |>
   scale_x_continuous(breaks = seq(2002, 2022, 1)) +
   scale_fill_manual(values = pal, name = "Mining Type") +
   labs(
-    title = "Artisanal and Industrial Mining in the Brazilian Legal Amazon",
-    subtitle = "2002-2022",
+    #title = "Artisanal and Industrial Mining in the Brazilian Legal Amazon",
+    #subtitle = "2002-2022",
     x = "Year",
     y = "Area (ha)",
     caption = "Data: MapBiomas"
